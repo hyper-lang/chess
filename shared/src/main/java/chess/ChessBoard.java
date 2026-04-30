@@ -7,9 +7,14 @@ package chess;
  * signature of the existing methods.
  */
 public class ChessBoard {
+    private ChessPosition[][] board = new ChessPosition[7][7];
 
     public ChessBoard() {
-        
+        for(int i = 1; i < 9; i++){
+            for(int j = 1; j < 9; j++){
+                board[]
+            }
+        }
     }
 
     /**
