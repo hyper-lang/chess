@@ -1,6 +1,5 @@
 package chess;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -14,7 +13,7 @@ public class ChessBoard {
     private Map<ChessPosition, ChessPiece> board = new HashMap<>();
 
     public ChessBoard() {
-        
+
     }
 
     /**
