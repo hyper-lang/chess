@@ -14,11 +14,7 @@ public class ChessBoard {
     private Map<ChessPosition, ChessPiece> board = new HashMap<>();
 
     public ChessBoard() {
-        for(int i = 1; i < 9; i++){
-            for(int j = 1; j < 9; j++){
-                board.put(new ChessPosition(j, i), null);
-            }
-        }
+        
     }
 
     /**
@@ -42,25 +38,19 @@ public class ChessBoard {
         return board.get(position);
     }
 
+
     /**
      * Sets 4 corners of a rectangle to a certain piece based on it's quadrant 3 position (helper function for resetBoard)
      * 
-     * @param j the row coordinate for the piece
-     * @param i the column coordinate for the piece
+     * @param row the row coordinate for the piece
+     * @param col the column coordinate for the piece
      * @param piece the piece to set
      */
-    private void setRectangle(int i, int j, ChessPiece.PieceType piecetype){
-        if(piecetype == null){
-            addPiece(new ChessPosition(j, i), null)
-            addPiece(new ChessPosition(j, 9 - i), null);
-            addPiece(new ChessPosition(9 - j, i), null);
-            addPiece(new ChessPosition(9 - j, 9 - i), null);
-        }else {
-            addPiece(new ChessPosition(j, i), new ChessPiece(ChessGame.TeamColor.WHITE, piecetype))
-            addPiece(new ChessPosition(j, 9 - i), new ChessPiece(ChessGame.TeamColor.WHITE, piecetype));
-            addPiece(new ChessPosition(9 - j, i), new ChessPiece(ChessGame.TeamColor.BLACK, piecetype));
-            addPiece(new ChessPosition(9 - j, 9 - i), new ChessPiece(ChessGame.TeamColor.BLACK, piecetype));
-        }
+    private void setRectangle(int row, int col, ChessPiece.PieceType piecetype){
+        addPiece(new ChessPosition(row, col), new ChessPiece(ChessGame.TeamColor.WHITE, piecetype));
+        addPiece(new ChessPosition(row, 9 - col), new ChessPiece(ChessGame.TeamColor.WHITE, piecetype));
+        addPiece(new ChessPosition(9 - row, col), new ChessPiece(ChessGame.TeamColor.BLACK, piecetype));
+        addPiece(new ChessPosition(9 - row, 9 - col), new ChessPiece(ChessGame.TeamColor.BLACK, piecetype));
     }
 
     /**
@@ -68,13 +58,25 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
+        board = new HashMap<>();
+        setRectangle(1, 1, ChessPiece.PieceType.ROOK);
+        setRectangle(1, 2, ChessPiece.PieceType.KNIGHT);
+        setRectangle(1, 3, ChessPiece.PieceType.BISHOP);
+        addPiece(new ChessPosition(1, 4), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN));
+        addPiece(new ChessPosition(1, 5), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KING));
+        addPiece(new ChessPosition(8, 4), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.QUEEN));
+        addPiece(new ChessPosition(8, 5), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING));
+
+        for(int col = 1; col < 5; col++){
+            setRectangle(2, col, ChessPiece.PieceType.PAWN);
+        }
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + Arrays.hashCode(board);
+        result = prime * result + ((board == null) ? 0 : board.hashCode());
         return result;
     }
 
@@ -87,7 +89,10 @@ public class ChessBoard {
         if (getClass() != obj.getClass())
             return false;
         ChessBoard other = (ChessBoard) obj;
-        if (!Arrays.equals(board, other.board))
+        if (board == null) {
+            if (other.board != null)
+                return false;
+        } else if (!board.equals(other.board))
             return false;
         return true;
     }
