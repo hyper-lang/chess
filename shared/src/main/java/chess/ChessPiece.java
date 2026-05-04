@@ -74,7 +74,7 @@ public class ChessPiece {
     private boolean checkBounds(ChessPosition position){
         int row = position.getRow();
         int col = position.getColumn();
-        if(row >= 1 && row <= 8 && col >= 1 && row <= 8){
+        if(row >= 1 && row <= 8 && col >= 1 && col <= 8){
             return true;
         }
         return false;
@@ -96,15 +96,30 @@ public class ChessPiece {
     }
 
     /**
-     * Helper function for pawn move. Determines if a pawn can take
+     * Helper function for the pawnMoves function. Determines if a pawn can take
      * 
      * @param board
      * @param position
      * @param color
-     * @return true if the pawn can take at that square
+     * @return true if the piece can take at that square
      */
     private boolean canTake(ChessBoard board, ChessPosition position, ChessGame.TeamColor color){
         if(board.getPiece(position) != null && board.getPiece(position).pieceColor != color){
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Helper function for pieces besides the pawn. Determines if the square can be landed on.
+     * 
+     * @param board
+     * @param position
+     * @param color
+     * @return true if a piece can move to that position
+     */
+    private boolean canMove(ChessBoard board, ChessPosition position, ChessGame.TeamColor color){
+        if(canLand(board, position, color) || canTake(board, position, color)){
             return true;
         }
         return false;
@@ -164,6 +179,81 @@ public class ChessPiece {
 
     private Collection<ChessMove> rookMoves(ChessBoard board, ChessPosition myPosition){
         Collection<ChessMove> moves = new ArrayList<ChessMove>();
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
+        int count = 1;
+        ChessPosition end;
+
+        while(true){
+            end = new ChessPosition(row + count, col);
+            if(!checkBounds(end)){
+                break;
+            }
+            if(canTake(board, end, pieceColor)){
+                moves.add(new ChessMove(myPosition, end, null));
+                break;
+            } else if(canLand(board, end, pieceColor)){
+                moves.add(new ChessMove(myPosition, end, null));
+            }else{
+                break;
+            }
+            count++;
+        }
+
+        count = 1;
+
+        while(true){
+            end = new ChessPosition(row - count, col);
+            if(!checkBounds(end)){
+                break;
+            }
+            if(canTake(board, end, pieceColor)){
+                moves.add(new ChessMove(myPosition, end, null));
+                break;
+            } else if(canLand(board, end, pieceColor)){
+                moves.add(new ChessMove(myPosition, end, null));
+            }else{
+                break;
+            }
+            count++;
+        }
+
+        count = 1;
+
+        while(true){
+            end = new ChessPosition(row, col + count);
+            if(!checkBounds(end)){
+                break;
+            }
+            if(canTake(board, end, pieceColor)){
+                moves.add(new ChessMove(myPosition, end, null));
+                break;
+            } else if(canLand(board, end, pieceColor)){
+                moves.add(new ChessMove(myPosition, end, null));
+            }else{
+                break;
+            }
+            count++;
+        }
+
+        count = 1;
+
+        while(true){
+            end = new ChessPosition(row, col - count);
+            if(!checkBounds(end)){
+                break;
+            }
+            if(canTake(board, end, pieceColor)){
+                moves.add(new ChessMove(myPosition, end, null));
+                break;
+            } else if(canLand(board, end, pieceColor)){
+                moves.add(new ChessMove(myPosition, end, null));
+            }else{
+                break;
+            }
+            count++;
+        }
+
         return moves;
     }
 
