@@ -125,6 +125,30 @@ public class ChessPiece {
         return false;
     }
 
+    /**
+     * A helper function for knight and king moves. Validates a list of relative coordinates
+     * 
+     * @param board
+     * @param position
+     * @param color
+     * @return All valid moves for the given scenario
+     */
+    private Collection<ChessMove> validateMoves(ChessBoard board, ChessPosition position, ChessGame.TeamColor color, int[][] relativePositions){
+        Collection<ChessMove> moves = new ArrayList<ChessMove>();
+        int row = position.getRow();
+        int col = position.getColumn();
+        ChessPosition end;
+
+        for(int i = 0; i < 8; i++){
+            end = new ChessPosition(row + relativePositions[i][0], col + relativePositions[i][1]);
+            if(checkBounds(end) && canMove(board, end, pieceColor)){
+                moves.add(new ChessMove(position, end, null));
+            }
+        }
+
+        return moves;
+    }
+
     private Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition myPosition){
         Collection<ChessMove> moves = new ArrayList<ChessMove>();
         int direction = (pieceColor == ChessGame.TeamColor.WHITE) ? 1 : -1;
@@ -258,20 +282,8 @@ public class ChessPiece {
     }
 
     private Collection<ChessMove> knightMoves(ChessBoard board, ChessPosition myPosition){
-        Collection<ChessMove> moves = new ArrayList<ChessMove>();
-        int row = myPosition.getRow();
-        int col = myPosition.getColumn();
         int[][] positions = {{2, -1}, {2, 1}, {1, 2}, {-1, 2}, {-2, 1}, {-2, -1}, {-1, -2}, {1,  -2}};
-        ChessPosition end;
-
-        for(int i = 0; i < 8; i++){
-            end = new ChessPosition(row + positions[i][0], col + positions[i][1]);
-            if(checkBounds(end) && canMove(board, end, pieceColor)){
-                moves.add(new ChessMove(myPosition, end, null));
-            }
-        }
-
-        return moves;
+        return validateMoves(board, myPosition, pieceColor, positions);
     }
 
     private Collection<ChessMove> bishopMoves(ChessBoard board, ChessPosition myPosition){
@@ -362,7 +374,7 @@ public class ChessPiece {
     }
 
     private Collection<ChessMove> kingMoves(ChessBoard board, ChessPosition myPosition){
-        Collection<ChessMove> moves = new ArrayList<ChessMove>();
+        /*Collection<ChessMove> moves = new ArrayList<ChessMove>();
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
         int[][] positions = {{1, -1}, {1, 0}, {1, 1}, {0, 1}, {-1, 1}, {-1, 0}, {-1, -1}, {0,  -1}};
@@ -375,7 +387,9 @@ public class ChessPiece {
             }
         }
 
-        return moves;
+        return moves;*/
+        int[][] positions = {{1, -1}, {1, 0}, {1, 1}, {0, 1}, {-1, 1}, {-1, 0}, {-1, -1}, {0,  -1}};
+        return validateMoves(board, myPosition, pieceColor, positions);
     }
 
     @Override
