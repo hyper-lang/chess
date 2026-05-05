@@ -259,6 +259,18 @@ public class ChessPiece {
 
     private Collection<ChessMove> knightMoves(ChessBoard board, ChessPosition myPosition){
         Collection<ChessMove> moves = new ArrayList<ChessMove>();
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
+        int[][] positions = {{2, -1}, {2, 1}, {1, 2}, {-1, 2}, {-2, 1}, {-2, -1}, {-1, -2}, {1,  -2}};
+        ChessPosition end;
+
+        for(int i = 0; i < 8; i++){
+            end = new ChessPosition(row + positions[i][0], col + positions[i][1]);
+            if(checkBounds(end) && canMove(board, end, pieceColor)){
+                moves.add(new ChessMove(myPosition, end, null));
+            }
+        }
+
         return moves;
     }
 
