@@ -264,11 +264,88 @@ public class ChessPiece {
 
     private Collection<ChessMove> bishopMoves(ChessBoard board, ChessPosition myPosition){
         Collection<ChessMove> moves = new ArrayList<ChessMove>();
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
+        int count = 1;
+        ChessPosition end;
+
+        while(true){
+            end = new ChessPosition(row + count, col + count);
+            if(!checkBounds(end)){
+                break;
+            }
+            if(canTake(board, end, pieceColor)){
+                moves.add(new ChessMove(myPosition, end, null));
+                break;
+            } else if(canLand(board, end, pieceColor)){
+                moves.add(new ChessMove(myPosition, end, null));
+            }else{
+                break;
+            }
+            count++;
+        }
+
+        count = 1;
+
+        while(true){
+            end = new ChessPosition(row - count, col - count);
+            if(!checkBounds(end)){
+                break;
+            }
+            if(canTake(board, end, pieceColor)){
+                moves.add(new ChessMove(myPosition, end, null));
+                break;
+            } else if(canLand(board, end, pieceColor)){
+                moves.add(new ChessMove(myPosition, end, null));
+            }else{
+                break;
+            }
+            count++;
+        }
+
+        count = 1;
+
+        while(true){
+            end = new ChessPosition(row - count, col + count);
+            if(!checkBounds(end)){
+                break;
+            }
+            if(canTake(board, end, pieceColor)){
+                moves.add(new ChessMove(myPosition, end, null));
+                break;
+            } else if(canLand(board, end, pieceColor)){
+                moves.add(new ChessMove(myPosition, end, null));
+            }else{
+                break;
+            }
+            count++;
+        }
+
+        count = 1;
+
+        while(true){
+            end = new ChessPosition(row + count, col - count);
+            if(!checkBounds(end)){
+                break;
+            }
+            if(canTake(board, end, pieceColor)){
+                moves.add(new ChessMove(myPosition, end, null));
+                break;
+            } else if(canLand(board, end, pieceColor)){
+                moves.add(new ChessMove(myPosition, end, null));
+            }else{
+                break;
+            }
+            count++;
+        }
+
         return moves;
     }
 
     private Collection<ChessMove> queenMoves(ChessBoard board, ChessPosition myPosition){
         Collection<ChessMove> moves = new ArrayList<ChessMove>();
+        moves.addAll(rookMoves(board, myPosition));
+        moves.addAll(bishopMoves(board, myPosition));
         return moves;
     }
 
