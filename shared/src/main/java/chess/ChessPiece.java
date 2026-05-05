@@ -175,55 +175,49 @@ public class ChessPiece {
         }
     }
 
+    /**
+     * Helper function for the pawnMoves function. Handles different piece types in case of a promotion.
+     * @param moves
+     * @param position
+     * @param end
+     * @param isPromotion
+     */
+    private void addPawnMove(Collection<ChessMove> moves, ChessPosition position, ChessPosition end, boolean isPromotion){
+        if(isPromotion){
+            moves.add(new ChessMove(position, end, PieceType.KNIGHT));
+            moves.add(new ChessMove(position, end, PieceType.BISHOP));
+            moves.add(new ChessMove(position, end, PieceType.ROOK));
+            moves.add(new ChessMove(position, end, PieceType.QUEEN));        
+        } else{
+            moves.add(new ChessMove(position, end, null));
+        }
+    }
+
     private Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition myPosition){
         Collection<ChessMove> moves = new ArrayList<ChessMove>();
         int direction = (pieceColor == ChessGame.TeamColor.WHITE) ? 1 : -1;
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
-        boolean lastFile = (pieceColor == ChessGame.TeamColor.WHITE && row == 7) || (pieceColor == ChessGame.TeamColor.BLACK && row == 2);
+        boolean isPromotion = (pieceColor == ChessGame.TeamColor.WHITE && row == 7) || (pieceColor == ChessGame.TeamColor.BLACK && row == 2);
         boolean startingFile = (pieceColor == ChessGame.TeamColor.WHITE && row == 2) || (pieceColor == ChessGame.TeamColor.BLACK && row == 7);
 
-        //needs to be written better
-        if(lastFile){
-            ChessPosition end = new ChessPosition(row + direction, col - 1);
-            if(canTake(board, end, pieceColor) && checkBounds(end)){
-                moves.add(new ChessMove(myPosition, end, PieceType.KNIGHT));
-                moves.add(new ChessMove(myPosition, end, PieceType.BISHOP));
-                moves.add(new ChessMove(myPosition, end, PieceType.ROOK));
-                moves.add(new ChessMove(myPosition, end, PieceType.QUEEN));
-            }
-            end = new ChessPosition(row + direction, col + 1);
-            if(canTake(board, end, pieceColor) && checkBounds(end)){
-                moves.add(new ChessMove(myPosition, end, PieceType.KNIGHT));
-                moves.add(new ChessMove(myPosition, end, PieceType.BISHOP));
-                moves.add(new ChessMove(myPosition, end, PieceType.ROOK));
-                moves.add(new ChessMove(myPosition, end, PieceType.QUEEN));
-            }
-            end = new ChessPosition(row + direction, col);
-            if(canLand(board, end, pieceColor) && checkBounds(end)){
-                moves.add(new ChessMove(myPosition, end, PieceType.KNIGHT));
-                moves.add(new ChessMove(myPosition, end, PieceType.BISHOP));
-                moves.add(new ChessMove(myPosition, end, PieceType.ROOK));
-                moves.add(new ChessMove(myPosition, end, PieceType.QUEEN));
-            }
-        } else{
-            ChessPosition end = new ChessPosition(row + direction, col - 1);
-            if(canTake(board, end, pieceColor) && checkBounds(end)){
-                moves.add(new ChessMove(myPosition, end, null));
-            }
-            end = new ChessPosition(row + direction, col + 1);
-            if(canTake(board, end, pieceColor) && checkBounds(end)){
-                moves.add(new ChessMove(myPosition, end, null));
-            }
-            end = new ChessPosition(row + direction, col);
-            if(canLand(board, end, pieceColor) && checkBounds(end)){
-                moves.add(new ChessMove(myPosition, end, null));
-                end = new ChessPosition(row + direction * 2, col);
-                if(startingFile && canLand(board, end, pieceColor)){
-                    moves.add(new ChessMove(myPosition, end, null));
-                }
+        ChessPosition end = new ChessPosition(row + direction, col - 1);
+        if(canTake(board, end, pieceColor) && checkBounds(end)){
+            addPawnMove(moves, myPosition, end, isPromotion);
+        }
+        end = new ChessPosition(row + direction, col + 1);
+        if(canTake(board, end, pieceColor) && checkBounds(end)){
+            addPawnMove(moves, myPosition, end, isPromotion);
+        }
+        end = new ChessPosition(row + direction, col);
+        if(canLand(board, end, pieceColor) && checkBounds(end)){
+            addPawnMove(moves, myPosition, end, isPromotion);
+            end = new ChessPosition(row + direction * 2, col);
+            if(startingFile && canLand(board, end, pieceColor)){
+                addPawnMove(moves, myPosition, end, isPromotion);
             }
         }
+        
         return moves;
     }
 
