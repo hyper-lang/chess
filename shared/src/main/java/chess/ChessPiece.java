@@ -149,6 +149,32 @@ public class ChessPiece {
         return moves;
     }
 
+    /**
+     * Checks all the moves for one direction of rook or bishop moves, and adds them to the passed collection
+     */
+    private void checkOneDirection(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves, int[] direction){
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
+        int count = 1;
+        ChessPosition end;
+
+        while(true){
+            end = new ChessPosition(row + direction[0] * count, col + direction[1] * count);
+            if(!checkBounds(end)){
+                break;
+            }
+            if(canTake(board, end, pieceColor)){
+                moves.add(new ChessMove(myPosition, end, null));
+                break;
+            } else if(canLand(board, end, pieceColor)){
+                moves.add(new ChessMove(myPosition, end, null));
+            }else{
+                break;
+            }
+            count++;
+        }
+    }
+
     private Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition myPosition){
         Collection<ChessMove> moves = new ArrayList<ChessMove>();
         int direction = (pieceColor == ChessGame.TeamColor.WHITE) ? 1 : -1;
@@ -203,81 +229,10 @@ public class ChessPiece {
 
     private Collection<ChessMove> rookMoves(ChessBoard board, ChessPosition myPosition){
         Collection<ChessMove> moves = new ArrayList<ChessMove>();
-        int row = myPosition.getRow();
-        int col = myPosition.getColumn();
-        int count = 1;
-        ChessPosition end;
-
-        while(true){
-            end = new ChessPosition(row + count, col);
-            if(!checkBounds(end)){
-                break;
-            }
-            if(canTake(board, end, pieceColor)){
-                moves.add(new ChessMove(myPosition, end, null));
-                break;
-            } else if(canLand(board, end, pieceColor)){
-                moves.add(new ChessMove(myPosition, end, null));
-            }else{
-                break;
-            }
-            count++;
+        int[][] directions = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
+        for(int i = 0; i < 4; i++){
+            checkOneDirection(board, myPosition, moves, directions[i]);
         }
-
-        count = 1;
-
-        while(true){
-            end = new ChessPosition(row - count, col);
-            if(!checkBounds(end)){
-                break;
-            }
-            if(canTake(board, end, pieceColor)){
-                moves.add(new ChessMove(myPosition, end, null));
-                break;
-            } else if(canLand(board, end, pieceColor)){
-                moves.add(new ChessMove(myPosition, end, null));
-            }else{
-                break;
-            }
-            count++;
-        }
-
-        count = 1;
-
-        while(true){
-            end = new ChessPosition(row, col + count);
-            if(!checkBounds(end)){
-                break;
-            }
-            if(canTake(board, end, pieceColor)){
-                moves.add(new ChessMove(myPosition, end, null));
-                break;
-            } else if(canLand(board, end, pieceColor)){
-                moves.add(new ChessMove(myPosition, end, null));
-            }else{
-                break;
-            }
-            count++;
-        }
-
-        count = 1;
-
-        while(true){
-            end = new ChessPosition(row, col - count);
-            if(!checkBounds(end)){
-                break;
-            }
-            if(canTake(board, end, pieceColor)){
-                moves.add(new ChessMove(myPosition, end, null));
-                break;
-            } else if(canLand(board, end, pieceColor)){
-                moves.add(new ChessMove(myPosition, end, null));
-            }else{
-                break;
-            }
-            count++;
-        }
-
         return moves;
     }
 
@@ -288,81 +243,10 @@ public class ChessPiece {
 
     private Collection<ChessMove> bishopMoves(ChessBoard board, ChessPosition myPosition){
         Collection<ChessMove> moves = new ArrayList<ChessMove>();
-        int row = myPosition.getRow();
-        int col = myPosition.getColumn();
-        int count = 1;
-        ChessPosition end;
-
-        while(true){
-            end = new ChessPosition(row + count, col + count);
-            if(!checkBounds(end)){
-                break;
-            }
-            if(canTake(board, end, pieceColor)){
-                moves.add(new ChessMove(myPosition, end, null));
-                break;
-            } else if(canLand(board, end, pieceColor)){
-                moves.add(new ChessMove(myPosition, end, null));
-            }else{
-                break;
-            }
-            count++;
+        int[][] directions = {{1, 1}, {-1, 1}, {-1, -1}, {1, -1}};
+        for(int i = 0; i < 4; i++){
+            checkOneDirection(board, myPosition, moves, directions[i]);
         }
-
-        count = 1;
-
-        while(true){
-            end = new ChessPosition(row - count, col - count);
-            if(!checkBounds(end)){
-                break;
-            }
-            if(canTake(board, end, pieceColor)){
-                moves.add(new ChessMove(myPosition, end, null));
-                break;
-            } else if(canLand(board, end, pieceColor)){
-                moves.add(new ChessMove(myPosition, end, null));
-            }else{
-                break;
-            }
-            count++;
-        }
-
-        count = 1;
-
-        while(true){
-            end = new ChessPosition(row - count, col + count);
-            if(!checkBounds(end)){
-                break;
-            }
-            if(canTake(board, end, pieceColor)){
-                moves.add(new ChessMove(myPosition, end, null));
-                break;
-            } else if(canLand(board, end, pieceColor)){
-                moves.add(new ChessMove(myPosition, end, null));
-            }else{
-                break;
-            }
-            count++;
-        }
-
-        count = 1;
-
-        while(true){
-            end = new ChessPosition(row + count, col - count);
-            if(!checkBounds(end)){
-                break;
-            }
-            if(canTake(board, end, pieceColor)){
-                moves.add(new ChessMove(myPosition, end, null));
-                break;
-            } else if(canLand(board, end, pieceColor)){
-                moves.add(new ChessMove(myPosition, end, null));
-            }else{
-                break;
-            }
-            count++;
-        }
-
         return moves;
     }
 
@@ -374,20 +258,6 @@ public class ChessPiece {
     }
 
     private Collection<ChessMove> kingMoves(ChessBoard board, ChessPosition myPosition){
-        /*Collection<ChessMove> moves = new ArrayList<ChessMove>();
-        int row = myPosition.getRow();
-        int col = myPosition.getColumn();
-        int[][] positions = {{1, -1}, {1, 0}, {1, 1}, {0, 1}, {-1, 1}, {-1, 0}, {-1, -1}, {0,  -1}};
-        ChessPosition end;
-
-        for(int i = 0; i < 8; i++){
-            end = new ChessPosition(row + positions[i][0], col + positions[i][1]);
-            if(checkBounds(end) && canMove(board, end, pieceColor)){
-                moves.add(new ChessMove(myPosition, end, null));
-            }
-        }
-
-        return moves;*/
         int[][] positions = {{1, -1}, {1, 0}, {1, 1}, {0, 1}, {-1, 1}, {-1, 0}, {-1, -1}, {0,  -1}};
         return validateMoves(board, myPosition, pieceColor, positions);
     }
