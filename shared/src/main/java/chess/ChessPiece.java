@@ -111,12 +111,12 @@ public class ChessPiece {
     }
 
     /**
-     * Helper function for pieces besides the pawn. Determines if the square can be landed on.
+     * Helper function for knight and king. Determines if the square can be landed on.
      * 
      * @param board
      * @param position
      * @param color
-     * @return true if a piece can move to that position
+     * @return true if a knight or king can move to that position
      */
     private boolean canMove(ChessBoard board, ChessPosition position, ChessGame.TeamColor color){
         if(canLand(board, position, color) || canTake(board, position, color)){
@@ -351,6 +351,18 @@ public class ChessPiece {
 
     private Collection<ChessMove> kingMoves(ChessBoard board, ChessPosition myPosition){
         Collection<ChessMove> moves = new ArrayList<ChessMove>();
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
+        int[][] positions = {{1, -1}, {1, 0}, {1, 1}, {0, 1}, {-1, 1}, {-1, 0}, {-1, -1}, {0,  -1}};
+        ChessPosition end;
+
+        for(int i = 0; i < 8; i++){
+            end = new ChessPosition(row + positions[i][0], col + positions[i][1]);
+            if(checkBounds(end) && canMove(board, end, pieceColor)){
+                moves.add(new ChessMove(myPosition, end, null));
+            }
+        }
+
         return moves;
     }
 
