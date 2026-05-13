@@ -91,12 +91,12 @@ public class ChessGame {
     }
 
     /**
-     * Determines if the given team is in check
-     *
-     * @param teamColor which team to check for check
-     * @return True if the specified team is in check
+     * Helper function for isInCheck. Built to accept board as parameter to also be used in isInCheckMate
+     * @param teamColor
+     * @param board
+     * @return true if the king is in check.
      */
-    public boolean isInCheck(TeamColor teamColor) {
+    private boolean calculateCheck(TeamColor teamColor, ChessBoard board){
         Collection<ChessMove> allMoves = new ArrayList<>();
         TeamColor opposingColor = teamColor == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
         ChessPosition kingPosition = board.findKing(teamColor);
@@ -107,6 +107,16 @@ public class ChessGame {
             }
         }
         return false;
+    }
+
+    /**
+     * Determines if the given team is in check
+     *
+     * @param teamColor which team to check for check
+     * @return True if the specified team is in check
+     */
+    public boolean isInCheck(TeamColor teamColor) {
+        return calculateCheck(teamColor, board);
     }
 
     /**
@@ -137,7 +147,12 @@ public class ChessGame {
 
         for(ChessMove i : possibleMoves(teamColor)){
             ChessBoard hypothetical = new ChessBoard(board);
+            hypothetical.movePiece(i);
+            if(!calculateCheck(teamColor, hypothetical)){
+                return false;
+            }
         }
+        return true;
     }
 
     /**
