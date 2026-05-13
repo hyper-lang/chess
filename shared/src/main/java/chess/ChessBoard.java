@@ -17,7 +17,7 @@ public class ChessBoard {
     public ChessBoard(ChessBoard other){
         for(Map.Entry<ChessPosition, ChessPiece> i : other.board.entrySet()){
             ChessPiece copyPiece = new ChessPiece(i.getValue());
-            board.put(i.getKey(), i.getValue());
+            board.put(i.getKey(), copyPiece);
         }
     }
 
