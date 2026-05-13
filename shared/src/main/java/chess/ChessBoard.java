@@ -14,6 +14,13 @@ public class ChessBoard {
 
     public ChessBoard() {}
 
+    public ChessBoard(ChessBoard other){
+        for(Map.Entry<ChessPosition, ChessPiece> i : other.board.entrySet()){
+            ChessPiece copyPiece = new ChessPiece(i.getValue());
+            board.put(i.getKey(), i.getValue());
+        }
+    }
+
     /**
      * Adds a chess piece to the chessboard
      *

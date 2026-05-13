@@ -83,7 +83,7 @@ public class ChessGame {
                 current = new ChessPosition(j, i);
                 temp = board.getPiece(current);
                 if(temp != null && temp.getTeamColor() == team){
-                    allMoves.addAll(temp.pieceMoves(board, current));
+                    allMoves.addAll(validMoves(current));
                 }
             }
         }
@@ -102,7 +102,7 @@ public class ChessGame {
         ChessPosition kingPosition = board.findKing(teamColor);
         allMoves = possibleMoves(opposingColor);
         for(ChessMove i : allMoves){
-            if(i.getEndPosition() == kingPosition){
+            if(i.getEndPosition().equals(kingPosition)){
                 return true;
             }
         }
@@ -116,7 +116,25 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        // Collection<ChessMove> allMoves = new ArrayList<>();
+        // TeamColor opposingColor = teamColor == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
+        // int count = 0;
+        // ChessPosition kingPosition = board.findKing(teamColor);
+        // allMoves = possibleMoves(opposingColor);
+        // Collection<ChessMove> kingMoves = board.getPiece(kingPosition).pieceMoves(board, kingPosition);
+        // for(ChessMove i : kingMoves){
+        //     if(allMoves.contains(i)){
+        //         count++;
+        //     }
+        // }
+        // if(count == kingMoves.size() && isInCheck(teamColor)){
+        //     return true;
+        // }
+        // return false;
+        if(!isInCheck(teamColor)){
+            return false;
+        }
+
     }
 
     /**
