@@ -89,6 +89,15 @@ public class ChessBoard {
         return null;
     }
 
+    /**
+     * Function that moves a piece across the board.
+     * @param move
+     */
+    public void movePiece(ChessMove move){
+        addPiece(move.getEndPosition(), new ChessPiece(getPiece(move.getStartPosition())));
+        board.remove(move.getStartPosition());
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;

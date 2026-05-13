@@ -66,7 +66,6 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
     }
 
     /**
@@ -135,6 +134,9 @@ public class ChessGame {
             return false;
         }
 
+        for(ChessMove i : possibleMoves(teamColor)){
+            ChessBoard hypothetical = new ChessBoard(board);
+        }
     }
 
     /**
