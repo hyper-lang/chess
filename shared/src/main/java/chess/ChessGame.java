@@ -60,6 +60,21 @@ public class ChessGame {
     }
 
     /**
+     * Helper function for checking hypothetical moves
+     * @param startPosition
+     * @param moveBoard
+     * @return a collection of valid moves from the given board.
+     */
+    public Collection<ChessMove> validMoves(ChessPosition startPosition, ChessBoard moveBoard) {
+        ChessPiece piece;
+        piece = moveBoard.getPiece(startPosition);
+        if(piece != null){
+            return piece.pieceMoves(moveBoard, startPosition);
+        }
+        return null;
+    }
+
+    /**
      * Makes a move in the chess game
      *
      * @param move chess move to perform
@@ -84,7 +99,7 @@ public class ChessGame {
                 current = new ChessPosition(j, i);
                 temp = moveBoard.getPiece(current);
                 if(temp != null && temp.getTeamColor() == team){
-                    allMoves.addAll(validMoves(current));
+                    allMoves.addAll(validMoves(current, moveBoard));
                 }
             }
         }
