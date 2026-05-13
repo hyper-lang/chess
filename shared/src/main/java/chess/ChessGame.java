@@ -14,7 +14,7 @@ public class ChessGame {
     TeamColor turn;
 
     public ChessGame() {
-        ChessBoard board = new ChessBoard();
+        board = new ChessBoard();
         board.resetBoard();
         turn = TeamColor.WHITE;
     }
@@ -67,14 +67,15 @@ public class ChessGame {
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
         board.movePiece(move);
+        turn = turn == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
     }
 
     /**
-     * Helper function for isInCheck, isInCheckmate, and isInStalemate. Gets all the possible moves for all pieces of one color.
+     * Helper function for legalMoves and calculateCheck. Gets all the possible moves for all pieces of one color.
      * @param team
      * @return a collection of all possible moves all pieces of one team can make.
      */
-    private Collection<ChessMove> possibleMoves(TeamColor team){
+    private Collection<ChessMove> possibleMoves(TeamColor team, ChessBoard board){
         Collection<ChessMove> allMoves = new ArrayList<ChessMove>();
         ChessPosition current;
         ChessPiece temp;
@@ -90,10 +91,16 @@ public class ChessGame {
         return allMoves;
     }
 
+    /**
+     * Determines all legal moves for a team color
+     * @param team
+     * @return all the legal moves a team can make.
+     */
     private Collection<ChessMove> legalMoves(TeamColor team){
         Collection<ChessMove> allLegalMoves = new ArrayList<>();
-        ChessBoard hypothetical = new ChessBoard(board);
-        for(ChessMove i : possibleMoves(team)){
+        ChessBoard hypothetical;
+        for(ChessMove i : possibleMoves(team, board)){
+            hypothetical = new ChessBoard(board);
             hypothetical.movePiece(i);
             if(!calculateCheck(team, hypothetical)){
                 allLegalMoves.add(i);
@@ -112,7 +119,7 @@ public class ChessGame {
         Collection<ChessMove> allMoves = new ArrayList<>();
         TeamColor opposingColor = teamColor == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
         ChessPosition kingPosition = board.findKing(teamColor);
-        allMoves = possibleMoves(opposingColor);
+        allMoves = possibleMoves(opposingColor, board);
         for(ChessMove i : allMoves){
             if(i.getEndPosition().equals(kingPosition)){
                 return true;
