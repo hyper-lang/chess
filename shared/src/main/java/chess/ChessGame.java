@@ -90,6 +90,18 @@ public class ChessGame {
         return allMoves;
     }
 
+    private Collection<ChessMove> legalMoves(TeamColor team){
+        Collection<ChessMove> allLegalMoves = new ArrayList<>();
+        ChessBoard hypothetical = new ChessBoard(board);
+        for(ChessMove i : possibleMoves(team)){
+            hypothetical.movePiece(i);
+            if(!calculateCheck(team, hypothetical)){
+                allLegalMoves.add(i);
+            }
+        }
+        return allLegalMoves;
+    }
+
     /**
      * Helper function for isInCheck. Built to accept board as parameter to also be used in isInCheckMate
      * @param teamColor
@@ -126,26 +138,11 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        // Collection<ChessMove> allMoves = new ArrayList<>();
-        // TeamColor opposingColor = teamColor == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
-        // int count = 0;
-        // ChessPosition kingPosition = board.findKing(teamColor);
-        // allMoves = possibleMoves(opposingColor);
-        // Collection<ChessMove> kingMoves = board.getPiece(kingPosition).pieceMoves(board, kingPosition);
-        // for(ChessMove i : kingMoves){
-        //     if(allMoves.contains(i)){
-        //         count++;
-        //     }
-        // }
-        // if(count == kingMoves.size() && isInCheck(teamColor)){
-        //     return true;
-        // }
-        // return false;
         if(!isInCheck(teamColor)){
             return false;
         }
 
-        for(ChessMove i : possibleMoves(teamColor)){
+        for(ChessMove i : legalMoves(teamColor)){
             ChessBoard hypothetical = new ChessBoard(board);
             hypothetical.movePiece(i);
             if(!calculateCheck(teamColor, hypothetical)){
