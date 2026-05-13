@@ -12,9 +12,7 @@ import java.util.HashMap;
 public class ChessBoard {
     private Map<ChessPosition, ChessPiece> board = new HashMap<>();
 
-    public ChessBoard() {
-
-    }
+    public ChessBoard() {}
 
     /**
      * Adds a chess piece to the chessboard
@@ -36,7 +34,6 @@ public class ChessBoard {
     public ChessPiece getPiece(ChessPosition position) {
         return board.get(position);
     }
-
 
     /**
      * Sets 4 corners of a rectangle to a certain piece based on it's quadrant 3 position (helper function for resetBoard)
@@ -69,6 +66,20 @@ public class ChessBoard {
         for(int col = 1; col < 5; col++){
             setRectangle(2, col, ChessPiece.PieceType.PAWN);
         }
+    }
+
+    /**
+     * Helper function for ChessGame functions. Locates the king of a given team.
+     * @param team
+     * @return ChessPosition of the king
+     */
+    public ChessPosition findKing(ChessGame.TeamColor team){
+        for(Map.Entry<ChessPosition, ChessPiece> i : board.entrySet()){
+            if(i.getValue().getPieceType() == ChessPiece.PieceType.KING && i.getValue().getTeamColor() == team){
+                return i.getKey();
+            }
+        }
+        return null;
     }
 
     @Override
