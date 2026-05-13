@@ -75,14 +75,14 @@ public class ChessGame {
      * @param team
      * @return a collection of all possible moves all pieces of one team can make.
      */
-    private Collection<ChessMove> possibleMoves(TeamColor team, ChessBoard board){
+    private Collection<ChessMove> possibleMoves(TeamColor team, ChessBoard moveBoard){
         Collection<ChessMove> allMoves = new ArrayList<ChessMove>();
         ChessPosition current;
         ChessPiece temp;
         for(int i = 1; i < 9; i++){
             for(int j = 1; j < 9; j++){
                 current = new ChessPosition(j, i);
-                temp = board.getPiece(current);
+                temp = moveBoard.getPiece(current);
                 if(temp != null && temp.getTeamColor() == team){
                     allMoves.addAll(validMoves(current));
                 }
@@ -187,4 +187,34 @@ public class ChessGame {
     public ChessBoard getBoard() {
         return board;
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((board == null) ? 0 : board.hashCode());
+        result = prime * result + ((turn == null) ? 0 : turn.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ChessGame other = (ChessGame) obj;
+        if (board == null) {
+            if (other.board != null)
+                return false;
+        } else if (!board.equals(other.board))
+            return false;
+        if (turn != other.turn)
+            return false;
+        return true;
+    }
+
+    
 }
