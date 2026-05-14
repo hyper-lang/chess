@@ -72,9 +72,9 @@ public class ChessGame {
      * Helper function for checking hypothetical moves
      * @param startPosition
      * @param moveBoard
-     * @return a collection of valid moves from the given board.
+     * @return a collection of legal moves from the given board.
      */
-    public Collection<ChessMove> validMoves(ChessPosition startPosition, ChessBoard moveBoard) {
+    public Collection<ChessMove> semivalidMoves(ChessPosition startPosition, ChessBoard moveBoard) {
         ChessPiece piece;
         piece = moveBoard.getPiece(startPosition);
         if(piece != null){
@@ -124,7 +124,23 @@ public class ChessGame {
                 current = new ChessPosition(j, i);
                 temp = moveBoard.getPiece(current);
                 if(temp != null && temp.getTeamColor() == team){
-                    allMoves.addAll(validMoves(current, moveBoard));
+                    allMoves.addAll(semivalidMoves(current, moveBoard));
+                }
+            }
+        }
+        return allMoves;
+    }
+
+    private Collection<ChessMove> legalMoves(TeamColor team, ChessBoard moveBoard){
+        Collection<ChessMove> allMoves = new ArrayList<ChessMove>();
+        ChessPosition current;
+        ChessPiece temp;
+        for(int i = 1; i < 9; i++){
+            for(int j = 1; j < 9; j++){
+                current = new ChessPosition(j, i);
+                temp = moveBoard.getPiece(current);
+                if(temp != null && temp.getTeamColor() == team){
+                    allMoves.addAll(validMoves(current));
                 }
             }
         }
@@ -190,7 +206,10 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        if(!isInCheck(teamColor) && legalMoves(teamColor, board).isEmpty()){
+            return true;
+        }
+        return false;
     }
 
     /**
