@@ -51,12 +51,21 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        ChessPiece piece;
-        piece = board.getPiece(startPosition);
-        if(piece != null){
-            return piece.pieceMoves(board, startPosition);
+        ChessPiece piece = board.getPiece(startPosition);
+
+        if(piece == null){
+            return null;
         }
-        return null;
+        Collection<ChessMove> legalMoves = new ArrayList<>();
+        for(ChessMove i : piece.pieceMoves(board, startPosition)){
+            ChessBoard hypothetical = new ChessBoard(board);
+            hypothetical.movePiece(i);
+
+            if(!calculateCheck(piece.getTeamColor(), hypothetical)){
+                legalMoves.add(i);
+            }
+        }
+        return legalMoves;
     }
 
     /**
@@ -107,24 +116,6 @@ public class ChessGame {
     }
 
     /**
-     * Determines all legal moves for a team color
-     * @param team
-     * @return all the legal moves a team can make.
-     */
-    private Collection<ChessMove> legalMoves(TeamColor team){
-        Collection<ChessMove> allLegalMoves = new ArrayList<>();
-        ChessBoard hypothetical;
-        for(ChessMove i : possibleMoves(team, board)){
-            hypothetical = new ChessBoard(board);
-            hypothetical.movePiece(i);
-            if(!calculateCheck(team, hypothetical)){
-                allLegalMoves.add(i);
-            }
-        }
-        return allLegalMoves;
-    }
-
-    /**
      * Helper function for isInCheck. Built to accept board as parameter to also be used in isInCheckMate
      * @param teamColor
      * @param board
@@ -164,7 +155,7 @@ public class ChessGame {
             return false;
         }
 
-        for(ChessMove i : legalMoves(teamColor)){
+        for(ChessMove i : possibleMoves(teamColor, board)){
             ChessBoard hypothetical = new ChessBoard(board);
             hypothetical.movePiece(i);
             if(!calculateCheck(teamColor, hypothetical)){
