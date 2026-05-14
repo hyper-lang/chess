@@ -94,7 +94,15 @@ public class ChessBoard {
      * @param move
      */
     public void movePiece(ChessMove move){
-        addPiece(move.getEndPosition(), new ChessPiece(getPiece(move.getStartPosition())));
+        ChessPiece newPiece;
+        ChessPiece.PieceType promotionPiece = move.getPromotionPiece();
+        if(promotionPiece == null){
+            newPiece = new ChessPiece(getPiece(move.getStartPosition()));
+        } else{
+            newPiece = new ChessPiece(getPiece(move.getStartPosition()).getTeamColor(), promotionPiece);
+        }
+
+        addPiece(move.getEndPosition(), newPiece);
         board.remove(move.getStartPosition());
     }
 

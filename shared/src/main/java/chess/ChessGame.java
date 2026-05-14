@@ -90,6 +90,22 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        ChessPiece piece = board.getPiece(move.getStartPosition());
+        
+        if(piece == null){
+            throw new InvalidMoveException();
+        }
+
+        if(piece.getTeamColor() != turn){
+            throw new InvalidMoveException();
+        }
+
+        Collection<ChessMove> moves = validMoves(move.getStartPosition());
+
+        if(moves == null || !moves.contains(move)){
+            throw new InvalidMoveException();
+        }
+
         board.movePiece(move);
         turn = turn == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
     }
@@ -114,6 +130,7 @@ public class ChessGame {
         }
         return allMoves;
     }
+
 
     /**
      * Helper function for isInCheck. Built to accept board as parameter to also be used in isInCheckMate
