@@ -24,7 +24,7 @@ public class Server {
         GameDAO gameDAO = new MemoryGameDAO();
 
         userService = new UserService(userDAO, authDAO);
-        gameService = new GameService();
+        gameService = new GameService(authDAO, gameDAO);
         clearService = new ClearService(userDAO, authDAO, gameDAO);
 
         javalin = Javalin.create(config -> config.staticFiles.add("/server/web"));
@@ -32,6 +32,11 @@ public class Server {
         // Register your endpoints and exception handlers here.
         javalin.post("/register", this::register);
         javalin.delete("/db", this::clear);
+        javalin.post("/session", this::login);
+        javalin.delete("/session", this::logout);
+        javalin.get("/game", this::listGames);
+        javalin.post("/game", this::createGame);
+        javalin.put("/game", this::joinGame);
     }
 
     public int run(int desiredPort) {
@@ -49,7 +54,7 @@ public class Server {
             UserData user = serializer.fromJson(ctx.body(), UserData.class);
             AuthData auth = userService.register(user);
             ctx.status(200);
-            ctx.json(auth);
+            ctx.json(serializer.toJson(auth));
         } catch (Exception e){
             ctx.status(400);
             ctx.json("Error");
@@ -65,4 +70,35 @@ public class Server {
             ctx.json("Error");
         }
     }
+
+    public void login(Context ctx){
+        try{
+            UserData user = serializer.fromJson(ctx.body(), UserData.class);
+            AuthData auth = userService.login(user);
+            ctx.status(200);
+            ctx.json(serializer.toJson(auth));
+        } catch (Exception e){
+            ctx.status(400);
+            ctx.json("Error");
+        }
+    }
+
+    public void logout(Context ctx){
+        try{
+            String authToken = serializer.fromJson(ctx.body(), String.class);
+            userService.logout(authToken);
+            ctx.status(200);
+        } catch (Exception e){
+            ctx.status(400);
+            ctx.json("Error");
+        }
+    }
+
+    public void listGames(Context ctx){
+
+    }
+
+    public void createGame(Context ctx){}
+
+    public void joinGame(Context ctx){}
 }
