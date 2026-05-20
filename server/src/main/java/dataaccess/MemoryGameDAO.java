@@ -10,7 +10,7 @@ public class MemoryGameDAO implements GameDAO {
     Map<Integer, GameData> games = new HashMap<>();
     int count;
 
-    MemoryGameDAO(){
+    public MemoryGameDAO(){
         count = 1;
     }
 

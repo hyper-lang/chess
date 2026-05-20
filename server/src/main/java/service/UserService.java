@@ -9,13 +9,13 @@ public class UserService {
     private UserDAO userDAO;
     private AuthDAO authDAO;
 
-    public static String generateToken() {
-        return UUID.randomUUID().toString();
-    }
-
     public UserService(UserDAO userDAO, AuthDAO authDAO){
         this.userDAO = userDAO;
         this.authDAO = authDAO;
+    }
+
+    public static String generateToken() {
+        return UUID.randomUUID().toString();
     }
 
     public AuthData register(UserData user) throws DataAccessException{

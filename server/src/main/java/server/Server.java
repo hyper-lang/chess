@@ -21,16 +21,17 @@ public class Server {
 
         UserDAO userDAO = new MemoryUserDAO();
         AuthDAO authDAO = new MemoryAuthDAO();
-        // GameDao gameDAO = new MemorayGameDAO();
+        GameDAO gameDAO = new MemoryGameDAO();
 
         userService = new UserService(userDAO, authDAO);
         gameService = new GameService();
-        clearService = new ClearService();
+        clearService = new ClearService(userDAO, authDAO, gameDAO);
 
         javalin = Javalin.create(config -> config.staticFiles.add("/server/web"));
 
         // Register your endpoints and exception handlers here.
         javalin.post("/register", this::register);
+        javalin.delete("/db", this::clear);
     }
 
     public int run(int desiredPort) {
@@ -49,6 +50,16 @@ public class Server {
             AuthData auth = userService.register(user);
             ctx.status(200);
             ctx.json(auth);
+        } catch (Exception e){
+            ctx.status(400);
+            ctx.json("Error");
+        }
+    }
+
+    public void clear(Context ctx){
+      try{
+            clearService.clear();
+            ctx.status(200);
         } catch (Exception e){
             ctx.status(400);
             ctx.json("Error");
