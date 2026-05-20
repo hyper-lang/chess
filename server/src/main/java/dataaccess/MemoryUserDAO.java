@@ -5,18 +5,20 @@ import java.util.Map;
 import java.util.HashMap;
 
 public class MemoryUserDAO implements UserDAO {
-    private Map<String, String[]> users = new HashMap<>();
+    private Map<String, UserData> users = new HashMap<>();
 
-    public void createUser(UserData user){
-        users.put(user.username(), new String[]{user.email(), user.password()});
+    @Override
+    public void createUser(UserData user) throws DataAccessException{
+        users.put(user.username(), user);
     }
 
-    public UserData getUser(String username){
-        String[] data = users.get(username);
-        return new UserData(username, data[0], data[1]);
+    @Override
+    public UserData getUser(String username) throws DataAccessException{
+        return users.get(username);
     }
 
-    public void clear(){
+    @Override
+    public void clear() throws DataAccessException{
         users = new HashMap<>();
     }
 }

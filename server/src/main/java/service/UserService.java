@@ -13,8 +13,10 @@ public class UserService {
     }
 
     public AuthData register(UserData user){
-        userDAO.createUser();
+        userDAO.createUser(user);
     }
+
     public AuthData login(){}
+    
     public void logout(String authToken){}
 }
