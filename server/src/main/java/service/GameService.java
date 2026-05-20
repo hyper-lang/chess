@@ -13,9 +13,9 @@ public class GameService {
         this.gameDAO = gameDAO;
     }
 
-    public int createGame(String authToken, GameData game) throws DataAccessException{
+    public int createGame(String authToken) throws DataAccessException{
         if(authDAO.getAuth(authToken) != null){
-            return gameDAO.createGame(game);
+            return gameDAO.createGame(new GameData());
         } else{
             throw new DataAccessException("Could not create game");
         }

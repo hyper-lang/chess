@@ -95,10 +95,25 @@ public class Server {
     }
 
     public void listGames(Context ctx){
-
+        try{
+            ctx.status(200);
+            ctx.json(serializer.toJson(gameService.listGames()));
+        } catch (Exception e){
+            ctx.status(400);
+            ctx.json("Error");
+        }
     }
 
-    public void createGame(Context ctx){}
+    public void createGame(Context ctx){
+        try{
+            String authToken = serializer.fromJson(ctx.body(), String.class);
+            ctx.status(200);
+            ctx.json(gameService.createGame(authToken));
+        } catch (Exception e){
+            ctx.status(400);
+            ctx.json("Error");
+        }
+    }
 
     public void joinGame(Context ctx){}
 }
