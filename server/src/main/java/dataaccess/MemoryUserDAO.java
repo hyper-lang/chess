@@ -19,6 +19,6 @@ public class MemoryUserDAO implements UserDAO {
 
     @Override
     public void clear() throws DataAccessException{
-        users = new HashMap<>();
+        users.clear();
     }
 }
