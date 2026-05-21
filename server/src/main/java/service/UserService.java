@@ -19,11 +19,18 @@ public class UserService {
     }
 
     public AuthData register(UserData user) throws DataAccessException{
+        if (userDAO.getUser(user.username()) != null) {
+            throw new DataAccessException("username taken");
+        }
         userDAO.createUser(user);
         return login(user);
     }
 
     public AuthData login(UserData user) throws DataAccessException{
+        UserData existingUser = userDAO.getUser(user.username());
+        if (existingUser == null) {
+            throw new DataAccessException("unauthorized");
+        }
         AuthData authData = new AuthData(generateToken(), user.username());
         authDAO.createAuth(authData);
         return authData;
