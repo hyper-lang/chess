@@ -10,32 +10,34 @@ public class MemoryGameDAO implements GameDAO {
     Map<Integer, GameData> games = new HashMap<>();
     int count;
 
-    public MemoryGameDAO(){
+    public MemoryGameDAO() {
         count = 1;
     }
 
-    public int createGame(GameData game) throws DataAccessException{
-        games.put(count, game);
+    public int createGame(GameData game) throws DataAccessException {
+        GameData newGame = new GameData(count, game.whiteUsername(), game.blackUsername(), game.gameName(),
+                game.game());
+        games.put(count, newGame);
         return count++;
     }
 
-    public GameData getGame(int gameID) throws DataAccessException{
+    public GameData getGame(int gameID) throws DataAccessException {
         return games.get(gameID);
     }
 
-    public Collection<GameData> listGames() throws DataAccessException{
+    public Collection<GameData> listGames() throws DataAccessException {
         Collection<GameData> allGames = new ArrayList<>();
-        for(GameData i : games.values()){
+        for (GameData i : games.values()) {
             allGames.add(i);
         }
         return allGames;
     }
 
-    public void updateGame(int gameID, GameData game) throws DataAccessException{
+    public void updateGame(int gameID, GameData game) throws DataAccessException {
         games.replace(gameID, game);
     }
 
-    public void clear() throws DataAccessException{
+    public void clear() throws DataAccessException {
         games.clear();
     }
 }
