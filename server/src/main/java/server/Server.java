@@ -7,6 +7,9 @@ import io.javalin.*;
 import io.javalin.http.Context;
 import com.google.gson.Gson;
 
+import java.util.Collection;
+import java.util.Map;
+
 public class Server {
 
     private final Javalin javalin;
@@ -27,7 +30,7 @@ public class Server {
         gameService = new GameService(authDAO, gameDAO);
         clearService = new ClearService(userDAO, authDAO, gameDAO);
 
-        javalin = Javalin.create(config -> config.staticFiles.add("/server/web"));
+        javalin = Javalin.create();
 
         // Register your endpoints and exception handlers here.
         javalin.post("/user", this::register);
@@ -51,13 +54,13 @@ public class Server {
     public void register(Context ctx){
         System.out.println(ctx.body());
         try{
-            UserData user = serializer.fromJson(ctx.body(), UserData.class);
+            UserData user = ctx.bodyAsClass(UserData.class);
             AuthData auth = userService.register(user);
             ctx.status(200);
             ctx.json(auth);
         } catch (Exception e){
             ctx.status(400);
-            ctx.json("Error");
+            ctx.json(Map.of("message", "Error"));
         }
     }
 
@@ -67,62 +70,93 @@ public class Server {
             ctx.status(200);
         } catch (Exception e){
             ctx.status(400);
-            ctx.json("Error");
+            ctx.json(Map.of("message", "Error"));
         }
     }
 
     public void login(Context ctx){
         try{
-            UserData user = serializer.fromJson(ctx.body(), UserData.class);
+            UserData user = ctx.bodyAsClass(UserData.class);
             AuthData auth = userService.login(user);
             ctx.status(200);
             ctx.json(auth);
         } catch (Exception e){
             ctx.status(400);
-            ctx.json("Error");
+            ctx.json(Map.of("message", "Error"));
         }
     }
 
     public void logout(Context ctx){
-        try{
-            String authToken = serializer.fromJson(ctx.body(), String.class);
+        try {
+            String authToken = ctx.header("authorization");
             userService.logout(authToken);
             ctx.status(200);
-        } catch (Exception e){
-            ctx.status(400);
-            ctx.json("Error");
+        } catch (Exception e) {
+            ctx.status(401);
+            ctx.json(Map.of("message", "Error: unauthorized"));
         }
     }
 
     public void listGames(Context ctx){
         try{
+            String authToken = ctx.header("authorization");
+            Collection<GameData> games = gameService.listGames(authToken);
             ctx.status(200);
-            ctx.json(serializer.toJson(gameService.listGames()));
-        } catch (Exception e){
-            ctx.status(400);
-            ctx.json("Error");
+            ctx.json(Map.of("games", games));
+        } catch (DataAccessException e) {
+            if ("unauthorized".equals(e.getMessage())) {
+                ctx.status(401);
+                ctx.json(Map.of("message", "Error: unauthorized"));
+            } else {
+                ctx.status(500);
+                ctx.json(Map.of("message", "Error: " + e.getMessage()));
+            }
         }
     }
 
     public void createGame(Context ctx){
-        try{
-            String authToken = serializer.fromJson(ctx.body(), String.class);
+        try {
+            String authToken = ctx.header("authorization");
+            CreateGameRequest req = ctx.bodyAsClass(CreateGameRequest.class);
+            int gameID = gameService.createGame(authToken);
             ctx.status(200);
-            ctx.json(gameService.createGame(authToken));
-        } catch (Exception e){
-            ctx.status(400);
-            ctx.json("Error");
+            ctx.json(Map.of("gameID", gameID));
+        } catch (DataAccessException e) {
+            if ("unauthorized".equals(e.getMessage())) {
+                ctx.status(401);
+                ctx.json(Map.of("message", "Error: unauthorized"));
+            } else {
+                ctx.status(500);
+                ctx.json(Map.of("message", "Error: " + e.getMessage()));
+            }
         }
     }
 
     public void joinGame(Context ctx){
-        try{
-            String authToken = serializer.fromJson(ctx.body(), String.class);
+        try {
+            String authToken = ctx.header("authorization");
+            JoinGameRequest req = ctx.bodyAsClass(JoinGameRequest.class);
+            gameService.joinGame(authToken, req.gameID, req.playerColor);
             ctx.status(200);
-            ctx.json(gameService.createGame(authToken));
-        } catch (Exception e){
-            ctx.status(400);
-            ctx.json("Error");
+        } catch (DataAccessException e) {
+            String msg = e.getMessage();
+            switch (msg) {
+                case "unauthorized" -> ctx.status(401);
+                case "bad request" -> ctx.status(400);
+                case "game not found" -> ctx.status(404);
+                case "already taken" -> ctx.status(403);
+                default -> ctx.status(500);
+            }
+            ctx.json(Map.of("message", "Error: " + msg));
         }
+    }
+
+    public static class CreateGameRequest {
+        public String gameName;
+    }
+
+    public static class JoinGameRequest {
+        public int gameID;
+        public String playerColor;
     }
 }
