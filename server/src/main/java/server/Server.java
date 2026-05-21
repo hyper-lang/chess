@@ -30,7 +30,7 @@ public class Server {
         javalin = Javalin.create(config -> config.staticFiles.add("/server/web"));
 
         // Register your endpoints and exception handlers here.
-        javalin.post("/register", this::register);
+        javalin.post("/user", this::register);
         javalin.delete("/db", this::clear);
         javalin.post("/session", this::login);
         javalin.delete("/session", this::logout);
@@ -54,7 +54,7 @@ public class Server {
             UserData user = serializer.fromJson(ctx.body(), UserData.class);
             AuthData auth = userService.register(user);
             ctx.status(200);
-            ctx.json(serializer.toJson(auth));
+            ctx.json(auth);
         } catch (Exception e){
             ctx.status(400);
             ctx.json("Error");
@@ -76,7 +76,7 @@ public class Server {
             UserData user = serializer.fromJson(ctx.body(), UserData.class);
             AuthData auth = userService.login(user);
             ctx.status(200);
-            ctx.json(serializer.toJson(auth));
+            ctx.json(auth);
         } catch (Exception e){
             ctx.status(400);
             ctx.json("Error");
@@ -115,5 +115,14 @@ public class Server {
         }
     }
 
-    public void joinGame(Context ctx){}
+    public void joinGame(Context ctx){
+        try{
+            String authToken = serializer.fromJson(ctx.body(), String.class);
+            ctx.status(200);
+            ctx.json(gameService.createGame(authToken));
+        } catch (Exception e){
+            ctx.status(400);
+            ctx.json("Error");
+        }
+    }
 }
