@@ -2,8 +2,6 @@ package dataaccess;
 
 import java.sql.SQLException;
 
-import com.google.gson.Gson;
-
 import model.AuthData;
 
 public class DatabaseAuthDAO implements AuthDAO {
@@ -11,7 +9,7 @@ public class DatabaseAuthDAO implements AuthDAO {
         DatabaseManager.createDatabase();
         try (var conn = DatabaseManager.getConnection()) {
             String statement =  """
-            CREATE TABLE IF NOT EXISTS  auths (
+            CREATE TABLE IF NOT EXISTS auths (
               `id` int NOT NULL AUTO_INCREMENT,
               `auth_token` varchar(256) NOT NULL,
               `username` varchar(256) NOT NULL,
@@ -42,6 +40,7 @@ public class DatabaseAuthDAO implements AuthDAO {
         }    
     }
 
+    @Override
     public AuthData getAuth(String authToken) throws DataAccessException{
         var statement = "SELECT * FROM auths WHERE auth_token = ?";
         try (var conn = DatabaseManager.getConnection()) {
@@ -58,6 +57,7 @@ public class DatabaseAuthDAO implements AuthDAO {
         return null;
     }
 
+    @Override
     public void deleteAuth(String authToken) throws DataAccessException{
         var statement = "DELETE FROM auths WHERE auth_token = ?";
         try (var conn = DatabaseManager.getConnection()) {

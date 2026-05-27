@@ -4,7 +4,6 @@ import java.sql.SQLException;
 
 import org.mindrot.jbcrypt.BCrypt;
 
-import com.google.gson.Gson;
 import model.UserData;
 
 public class DatabaseUserDAO implements UserDAO {
