@@ -2,6 +2,8 @@ package dataaccess;
 
 import java.sql.SQLException;
 
+import com.google.gson.Gson;
+
 import model.AuthData;
 
 public class DatabaseAuthDAO implements AuthDAO {
@@ -26,8 +28,39 @@ public class DatabaseAuthDAO implements AuthDAO {
         }
     }
 
-    void createAuth(AuthData auth) throws DataAccessException;
-    AuthData getAuth(String authToken) throws DataAccessException;
-    void deleteAuth(String authToken) throws DataAccessException;
-    void clear() throws DataAccessException; 
+    @Override
+    public void createAuth(AuthData auth) throws DataAccessException{
+        var statement = "INSERT INTO users (username, json) VALUES (?, ?)";
+        String json = new Gson().toJson(auth);
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement(statement)) {
+                preparedStatement.setString(1, auth.authToken());
+                preparedStatement.setString(2, json);
+                preparedStatement.executeUpdate();
+            }
+        } catch(SQLException e){
+            throw new DataAccessException("Database connection or query failed", e);
+        }    
+    }
+
+    public AuthData getAuth(String authToken) throws DataAccessException{
+        ;
+    }
+
+    public void deleteAuth(String authToken) throws DataAccessException{
+        ;
+    }
+
+    @Override
+    public void clear() throws DataAccessException{
+        var statement = "TRUNCATE auths";
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement(statement)) {
+                var rs = preparedStatement.executeQuery();
+                rs.next();
+            }
+        } catch(SQLException e){
+            throw new DataAccessException("Database connection or query failed", e);
+        }
+    }
 }
