@@ -2,7 +2,10 @@ package dataaccess;
 
 import java.sql.SQLException;
 
+import com.google.gson.Gson;
+
 import dataaccess.DatabaseManager;
+import model.UserData;
 
 public class DatabaseUserDAO implements UserDAO {
     public DatabaseUserDAO() throws DataAccessException{
@@ -26,5 +29,38 @@ public class DatabaseUserDAO implements UserDAO {
         }
     }
 
-    
+    @Override
+    public void createUser(UserData user) throws DataAccessException{
+        var statement = "INSERT INTO users (username, json) VALUES (?, ?)";
+        String json = new Gson().toJson(user);
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement(statement)) {
+                preparedStatement.setString(1, user.username());
+                preparedStatement.setString(2, json);
+                preparedStatement.executeUpdate();
+            }
+        } catch(SQLException e){
+            throw new DataAccessException("Database connection or query failed", e);
+        }
+    }
+
+    @Override
+    public UserData getUser(String username) throws DataAccessException{
+        var statement = "SELECT * FROM users WHERE username = ?";
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement(statement)) {
+                preparedStatement.setString(1, username);
+                var rs = preparedStatement.executeQuery();
+                if(rs.next()){
+                    return new UserData(rs.getString("username"), rs.getString("password"), rs.getString("email"));
+                }                
+            }
+        } catch(SQLException e){
+            throw new DataAccessException("Database connection or query failed", e);
+        }
+        return null;
+    }
+
+    @Override
+    public void clear() throws DataAccessException{}
 }
