@@ -1,10 +1,7 @@
 package dataaccess;
 
 import java.sql.SQLException;
-
 import com.google.gson.Gson;
-
-import dataaccess.DatabaseManager;
 import model.UserData;
 
 public class DatabaseUserDAO implements UserDAO {
