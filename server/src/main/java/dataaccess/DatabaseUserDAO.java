@@ -62,5 +62,15 @@ public class DatabaseUserDAO implements UserDAO {
     }
 
     @Override
-    public void clear() throws DataAccessException{}
+    public void clear() throws DataAccessException{
+        var statement = "TRUNCATE users";
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement(statement)) {
+                var rs = preparedStatement.executeQuery();
+                rs.next();
+            }
+        } catch(SQLException e){
+            throw new DataAccessException("Database connection or query failed", e);
+        }
+    }
 }
