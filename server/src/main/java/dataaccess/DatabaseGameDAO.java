@@ -3,11 +3,11 @@ package dataaccess;
 import model.GameData;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 
-import org.mindrot.jbcrypt.BCrypt;
-
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class DatabaseGameDAO implements GameDAO {
     public DatabaseGameDAO() throws DataAccessException{
@@ -33,7 +33,7 @@ public class DatabaseGameDAO implements GameDAO {
         var statement = "INSERT INTO games (json) VALUES (?)";
         try (var conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.prepareStatement(statement, java.sql.Statement.RETURN_GENERATED_KEYS)) {
-                Gson gson = new Gson();
+                Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
                 preparedStatement.setString(1, gson.toJson(game));
                 preparedStatement.executeUpdate();
                 var rs = preparedStatement.getGeneratedKeys();
@@ -45,10 +45,59 @@ public class DatabaseGameDAO implements GameDAO {
         }
     }
 
-    public GameData getGame(int gameID) throws DataAccessException{}
-    
-    public Collection<GameData> listGames() throws DataAccessException{}
-    public void updateGame(int gameID, GameData game) throws DataAccessException{}
+    @Override
+    public GameData getGame(int gameID) throws DataAccessException{
+        var statement = "SELECT * FROM games WHERE id = ?";
+        Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement(statement)) {
+                preparedStatement.setInt(1, gameID);
+                var rs = preparedStatement.executeQuery();
+                if(rs.next()){
+                    return gson.fromJson(rs.getString("json"), GameData.class);
+                }                
+            }
+        } catch(SQLException e){
+            throw new DataAccessException("Database connection or query failed", e);
+        }
+        return null;
+    }
+
+    @Override
+    public Collection<GameData> listGames() throws DataAccessException{
+        Collection<GameData> games = new ArrayList<>();
+        var statement = "SELECT * FROM games";
+        Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement(statement)) {
+                var rs = preparedStatement.executeQuery();
+                while(rs.next()){
+                    String json = rs.getString("json");
+                    GameData game = gson.fromJson(json, GameData.class);
+                    games.add(game);
+                }
+            }
+        } catch(SQLException e){
+            throw new DataAccessException("Database connection or query failed", e);
+        }
+        return games;
+    }
+
+    @Override
+    public void updateGame(int gameID, GameData game) throws DataAccessException{
+        var statement = "UPDATE games SET json = ? WHERE id = ?";
+        Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
+        String updatedGame = gson.toJson(game);
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement(statement)) {
+                preparedStatement.setString(1, updatedGame);
+                preparedStatement.setInt(2, gameID);
+                preparedStatement.executeUpdate();
+            }
+        } catch(SQLException e){
+            throw new DataAccessException("Database connection or query failed", e);
+        }
+    }
 
     @Override
     public void clear() throws DataAccessException{
