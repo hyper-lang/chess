@@ -14,7 +14,7 @@ public class DatabaseAuthDAO implements AuthDAO {
             CREATE TABLE IF NOT EXISTS  auths (
               `id` int NOT NULL AUTO_INCREMENT,
               `auth_token` varchar(256) NOT NULL,
-              `json` TEXT DEFAULT NULL,
+              `username` varchar(256) NOT NULL,
               PRIMARY KEY (`id`),
               INDEX(username)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
@@ -30,12 +30,11 @@ public class DatabaseAuthDAO implements AuthDAO {
 
     @Override
     public void createAuth(AuthData auth) throws DataAccessException{
-        var statement = "INSERT INTO users (username, json) VALUES (?, ?)";
-        String json = new Gson().toJson(auth);
+        var statement = "INSERT INTO auths (auth_token, username) VALUES (?, ?)";
         try (var conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.prepareStatement(statement)) {
                 preparedStatement.setString(1, auth.authToken());
-                preparedStatement.setString(2, json);
+                preparedStatement.setString(2, auth.username());
                 preparedStatement.executeUpdate();
             }
         } catch(SQLException e){
@@ -44,11 +43,32 @@ public class DatabaseAuthDAO implements AuthDAO {
     }
 
     public AuthData getAuth(String authToken) throws DataAccessException{
-        ;
+        var statement = "SELECT * FROM auths WHERE auth_token = ?";
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement(statement)) {
+                preparedStatement.setString(1, authToken);
+                var rs = preparedStatement.executeQuery();
+                if(rs.next()){
+                    return new AuthData(rs.getString("auth_token"), rs.getString("username"));
+                }
+            }
+        } catch(SQLException e){
+            throw new DataAccessException("Database connection or query failed", e);
+        }
+        return null;
     }
 
     public void deleteAuth(String authToken) throws DataAccessException{
-        ;
+        var statement = "DELETE FROM auths WHERE auth_token = ?";
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement(statement)) {
+                preparedStatement.setString(1, authToken);
+                preparedStatement.executeUpdate();
+            }
+        } catch(SQLException e){
+            throw new DataAccessException("Database connection or query failed", e);
+        }
+
     }
 
     @Override
@@ -56,8 +76,7 @@ public class DatabaseAuthDAO implements AuthDAO {
         var statement = "TRUNCATE auths";
         try (var conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.prepareStatement(statement)) {
-                var rs = preparedStatement.executeQuery();
-                rs.next();
+                preparedStatement.executeUpdate();
             }
         } catch(SQLException e){
             throw new DataAccessException("Database connection or query failed", e);
