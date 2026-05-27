@@ -11,12 +11,13 @@ import com.google.gson.GsonBuilder;
 
 public class DatabaseGameDAO implements GameDAO {
     public DatabaseGameDAO() throws DataAccessException{
+        DatabaseManager.createDatabase();
         try (var conn = DatabaseManager.getConnection()) {
             String statement =  """
             CREATE TABLE IF NOT EXISTS games (
               `id` int NOT NULL AUTO_INCREMENT,
               `json` TEXT NOT NULL,
-              PRIMARY KEY (`id`),
+              PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """;
 
