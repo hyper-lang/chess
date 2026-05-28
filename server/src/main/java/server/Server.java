@@ -13,6 +13,8 @@ import com.google.gson.Gson;
 import io.javalin.json.JsonMapper;
 import org.jetbrains.annotations.NotNull;
 
+import javax.xml.crypto.Data;
+
 public class Server {
 
     private final Javalin javalin;
@@ -20,11 +22,18 @@ public class Server {
     private UserService userService;
     private GameService gameService;
     private ClearService clearService;
+    private UserDAO userDAO;
+    private AuthDAO authDAO;
+    private GameDAO gameDAO;
 
     public Server() {
-        UserDAO userDAO = new MemoryUserDAO();
-        AuthDAO authDAO = new MemoryAuthDAO();
-        GameDAO gameDAO = new MemoryGameDAO();
+        try{
+            userDAO = new DatabaseUserDAO();
+            authDAO = new DatabaseAuthDAO();
+            gameDAO = new DatabaseGameDAO();
+        } catch(DataAccessException e){
+            throw new RuntimeException(e);
+        }
 
         userService = new UserService(userDAO, authDAO);
         gameService = new GameService(authDAO, gameDAO);

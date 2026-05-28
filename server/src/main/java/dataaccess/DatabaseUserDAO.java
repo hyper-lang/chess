@@ -11,7 +11,7 @@ public class DatabaseUserDAO implements UserDAO {
         DatabaseManager.createDatabase();
         try (var conn = DatabaseManager.getConnection()) {
             String statement =  """
-            CREATE TABLE IF NOT EXISTS  users (
+            CREATE TABLE IF NOT EXISTS users (
               `id` int NOT NULL AUTO_INCREMENT,
               `username` varchar(256) NOT NULL,
               `password` varchar(256) NOT NULL,

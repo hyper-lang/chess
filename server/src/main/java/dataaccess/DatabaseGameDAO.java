@@ -34,12 +34,24 @@ public class DatabaseGameDAO implements GameDAO {
         var statement = "INSERT INTO games (json) VALUES (?)";
         try (var conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.prepareStatement(statement, java.sql.Statement.RETURN_GENERATED_KEYS)) {
-                Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
-                preparedStatement.setString(1, gson.toJson(game));
+                preparedStatement.setString(1, "{}");
                 preparedStatement.executeUpdate();
+
                 var rs = preparedStatement.getGeneratedKeys();
                 rs.next();
-                return rs.getInt(1);
+
+                int generatedID = rs.getInt(1);
+
+                GameData correctedGame = new GameData(
+                        generatedID,
+                        game.whiteUsername(),
+                        game.blackUsername(),
+                        game.gameName(),
+                        game.game());
+
+                updateGame(generatedID, correctedGame);
+
+                return generatedID;
             }
         } catch(SQLException e){
             throw new DataAccessException("Database connection or query failed", e);

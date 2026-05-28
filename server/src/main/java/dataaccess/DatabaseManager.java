@@ -14,6 +14,11 @@ public class DatabaseManager {
      */
     static {
         loadPropertiesFromResources();
+        try {
+            createDatabase(); // 👈 ADD THIS
+        } catch (DataAccessException e) {
+            throw new RuntimeException("Failed to initialize database", e);
+        }
     }
 
     /**
