@@ -2,8 +2,6 @@ package dataaccess;
 
 import java.sql.SQLException;
 
-import org.mindrot.jbcrypt.BCrypt;
-
 import model.UserData;
 
 public class DatabaseUserDAO implements UserDAO {

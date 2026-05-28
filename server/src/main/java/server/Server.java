@@ -13,8 +13,6 @@ import com.google.gson.Gson;
 import io.javalin.json.JsonMapper;
 import org.jetbrains.annotations.NotNull;
 
-import javax.xml.crypto.Data;
-
 public class Server {
 
     private final Javalin javalin;
