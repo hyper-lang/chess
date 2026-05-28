@@ -32,11 +32,10 @@ public class DatabaseUserDAO implements UserDAO {
     @Override
     public void createUser(UserData user) throws DataAccessException{
         var statement = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
-        String hashedPass = BCrypt.hashpw(user.password(), BCrypt.gensalt());
         try (var conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.prepareStatement(statement)) {
                 preparedStatement.setString(1, user.username());
-                preparedStatement.setString(2, hashedPass);
+                preparedStatement.setString(2, user.password());
                 preparedStatement.setString(3, user.email());
                 preparedStatement.executeUpdate();
             }

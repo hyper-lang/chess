@@ -27,8 +27,9 @@ public class UserService {
         if (user.username() == null || user.password() == null || user.email() == null) {
             throw new DataAccessException("bad request");
         }
-        userDAO.createUser(user);
-        return login(user);
+        String hashedPassword = BCrypt.hashpw(user.password(), BCrypt.gensalt());
+        userDAO.createUser(new UserData(user.username(), hashedPassword, user.email()));
+        return login(new UserData(user.username(), user.password(), user.email()));
     }
 
     public AuthData login(UserData user) throws DataAccessException {

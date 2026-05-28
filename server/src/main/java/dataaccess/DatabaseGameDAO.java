@@ -36,21 +36,16 @@ public class DatabaseGameDAO implements GameDAO {
             try (var preparedStatement = conn.prepareStatement(statement, java.sql.Statement.RETURN_GENERATED_KEYS)) {
                 preparedStatement.setString(1, "{}");
                 preparedStatement.executeUpdate();
-
                 var rs = preparedStatement.getGeneratedKeys();
                 rs.next();
-
                 int generatedID = rs.getInt(1);
-
                 GameData correctedGame = new GameData(
                         generatedID,
                         game.whiteUsername(),
                         game.blackUsername(),
                         game.gameName(),
                         game.game());
-
                 updateGame(generatedID, correctedGame);
-
                 return generatedID;
             }
         } catch(SQLException e){
