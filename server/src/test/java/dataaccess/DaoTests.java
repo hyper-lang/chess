@@ -112,7 +112,7 @@ public class DaoTests {
         AuthDAO authDAO = new DatabaseAuthDAO();
         authDAO.clear();
 
-        //
+        assertDoesNotThrow(() -> authDAO.deleteAuth("nonexistent"));
     }
 
     @Test
@@ -120,15 +120,17 @@ public class DaoTests {
         GameDAO gameDAO = new DatabaseGameDAO();
         gameDAO.clear();
 
-        gameDAO.createGame(new GameData(1, "cosmo", "shane", "byu150", new ChessGame()));
+        int gameID = gameDAO.createGame(new GameData(1, "cosmo", "shane", "byu150", new ChessGame()));
 
-        assertNotNull(gameDAO.getGame(1));
+        assertNotNull(gameDAO.getGame(gameID));
     }
 
     @Test
     public void createGameNegative() throws Exception{
         GameDAO gameDAO = new DatabaseGameDAO();
         gameDAO.clear();
+
+        assertThrows(DataAccessException.class, () -> gameDAO.createGame(null));
     }
 
     @Test
@@ -173,11 +175,22 @@ public class DaoTests {
     public void updateGamePositive() throws Exception{
         GameDAO gameDAO = new DatabaseGameDAO();
         gameDAO.clear();
+
+        int gameID = gameDAO.createGame(new GameData(0, "white", "black", "awesomeGame", null));
+
+        GameData updated = new GameData(gameID, "white", "black", "awesomerGame", null);
+        gameDAO.updateGame(gameID, updated);
+
+        assertEquals("awesomerGame", gameDAO.getGame(gameID).gameName());
     }
 
     @Test
     public void updateGameNegative() throws Exception{
         GameDAO gameDAO = new DatabaseGameDAO();
         gameDAO.clear();
+
+        GameData updated = new GameData(67, "white", "black", "none", null);
+
+        assertDoesNotThrow(() -> gameDAO.updateGame(67, updated));
     }
 }
