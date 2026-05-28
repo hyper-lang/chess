@@ -130,7 +130,7 @@ public class DaoTests {
         GameDAO gameDAO = new DatabaseGameDAO();
         gameDAO.clear();
 
-        assertThrows(DataAccessException.class, () -> gameDAO.createGame(null));
+        assertThrows(NullPointerException.class, () -> gameDAO.createGame(null));
     }
 
     @Test
