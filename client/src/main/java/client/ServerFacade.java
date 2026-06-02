@@ -4,21 +4,18 @@ import model.*;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.Authenticator.RequestorType;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
-import java.net.http.HttpResponse.BodyHandler;
 import java.util.Collection;
-import java.util.List;
-import java.util.Locale;
 import java.net.http.HttpResponse.BodyHandlers;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import java.util.Collection;
 import java.util.ArrayList;
 
 public class ServerFacade {
@@ -32,7 +29,7 @@ public class ServerFacade {
 
     private HttpResponse<String> sendRequest(String requestType, String fullUrl, String[] header, String body) throws Exception {
         var requestBuilder = HttpRequest.newBuilder(URI.create(fullUrl)).method(requestType, requestBodyPublisher(body));
-        if(!header[0].isEmpty()){
+        if(header != null && header.length >= 2){
             requestBuilder.header(header[0], header[1]);
         }
         var request = requestBuilder.build();
@@ -59,7 +56,9 @@ public class ServerFacade {
         sendRequest("DELETE", url + "/session", new String[]{"authorization", auth.authToken()}, null);
     }
     
-    public int createGame(AuthData auth) throws Exception {
+    public int createGame(AuthData auth, String gameName) throws Exception {
+        JsonObject body = new JsonObject();
+        body.addProperty("gameName", gameName);
         String response = sendRequest("POST", url + "/game", new String[]{"authorization", auth.authToken()}, null).body();
         JsonObject json = JsonParser.parseString(response).getAsJsonObject();
         return json.get("gameID").getAsInt();
@@ -68,8 +67,18 @@ public class ServerFacade {
     public Collection<GameData> listGames(AuthData auth) throws Exception {
         String response = sendRequest("GET", url + "/game", new String[]{"authorization", auth.authToken()}, null).body();
         JsonObject json = JsonParser.parseString(response).getAsJsonObject();
-        Collection<GameData> games;
+        JsonArray gamesJson = json.getAsJsonArray("games");
+        Collection<GameData> games = new ArrayList<>();
+        for(JsonElement i : gamesJson){
+            games.add(gson.fromJson(i, GameData.class));
+        }
+        return games;
     }
 
-    public void joinGame(AuthData auth, String playercolor, int gameID) throws Exception {}
+    public void joinGame(AuthData auth, String playercolor, int gameID) throws Exception {
+        JsonObject body = new JsonObject();
+        body.addProperty("playerColor", playercolor);
+        body.addProperty("gameID", gameID);
+        sendRequest("PUT", url + "/game", new String[]{"authorization", auth.authToken()}, body.toString());
+    }
 }
