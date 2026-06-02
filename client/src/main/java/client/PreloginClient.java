@@ -7,8 +7,8 @@ public class PreloginClient {
     private ServerFacade server;
     private String help;
     
-    public PreloginClient(){
-        server = new ServerFacade("https://localhost");
+    public PreloginClient(String url){
+        server = new ServerFacade(url);
         help = """
                 register <username> <password> <email>
                 login <username> <password>
@@ -21,16 +21,17 @@ public class PreloginClient {
         String[] words = input.split("\\s+");
         UserData user;
 
-        if(words[0].toLowerCase() == "register"){
+        if(words[0].toLowerCase().equals("register")){
             user = new UserData(words[1], words[2], words[3]);
             return server.register(user);
-        } else if(words[0].toLowerCase() == "login"){
+        } else if(words[0].toLowerCase().equals("login")){
             user = new UserData(words[1], words[2], null);
             return server.login(user);
-        } else if(words[0].toLowerCase() == "help"){
+        } else if(words[0].toLowerCase().equals("help")){
             System.out.println(help);
             return null;
         }
+        System.out.println("Invalid command. Type 'help' to view list of commands");
         return null;
     }
 }
