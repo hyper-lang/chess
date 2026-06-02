@@ -3,11 +3,11 @@ package client;
 import model.AuthData;
 import model.UserData;
 
-public class PreloginClient {
+public class PreLoginClient {
     private ServerFacade server;
     private String help;
     
-    public PreloginClient(String url){
+    public PreLoginClient(String url){
         server = new ServerFacade(url);
         help = """
                 register <username> <password> <email>

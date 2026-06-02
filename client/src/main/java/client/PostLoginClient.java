@@ -5,12 +5,12 @@ import model.GameData;
 
 import java.util.Collection;
 
-public class PostloginClient {
+public class PostLoginClient {
     private ServerFacade server;
     private AuthData auth;
     private String help;
 
-    public PostloginClient(String url, AuthData auth){
+    public PostLoginClient(String url, AuthData auth){
         server = new ServerFacade(url);
         this.auth = auth;
         help = """
