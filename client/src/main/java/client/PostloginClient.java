@@ -28,7 +28,7 @@ public class PostloginClient {
         String[] words = input.split("\\s+");
 
         if(words[0].toLowerCase().equals("create")){
-            int gameID = server.createGame(auth, words[0]);
+            int gameID = server.createGame(auth, words[1]);
             System.out.println("Created game number " + gameID);
         } else if(words[0].toLowerCase().equals("list")){
             Collection<GameData> games = server.listGames(auth);
