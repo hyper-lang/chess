@@ -44,8 +44,8 @@ public class ServerFacade {
         }
     }
 
-    public UserData register(UserData user) throws Exception {
-        return gson.fromJson(sendRequest("POST", url + "/user", null, gson.toJson(user)).body(), UserData.class);
+    public AuthData register(UserData user) throws Exception {
+        return gson.fromJson(sendRequest("POST", url + "/user", null, gson.toJson(user)).body(), AuthData.class);
     }
 
     public AuthData login(UserData user) throws Exception {
