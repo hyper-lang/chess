@@ -34,6 +34,7 @@ public class ServerFacadeTests {
 
     @Test
     public void registerNegative(){
+        facade.register(new UserData("bob", "bob", "bob"));
         AuthData auth = facade.register(new UserData("bob", "bob", "bob"));
         assertNull(auth.authToken());
     }
