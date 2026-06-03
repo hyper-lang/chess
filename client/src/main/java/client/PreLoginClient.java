@@ -22,17 +22,29 @@ public class PreLoginClient {
         UserData user;
         AuthData auth;
 
-        //add error handling
-        //remove error printing when finished
         if(words[0].toLowerCase().equals("register")){
+            if(words.length != 4){
+                throw new Exception("Incorrect amount of arguments!");
+            }
             user = new UserData(words[1], words[2], words[3]);
             auth = server.register(user);
-            System.out.println("Registered!");
+            if(auth.authToken() != null){
+                System.out.println("Registered!");
+            } else{
+                throw new Exception("Registration error!");
+            }
             return auth;
         } else if(words[0].toLowerCase().equals("login")){
+            if(words.length != 3){
+                throw new Exception("Incorrect amount of arguments!");
+            }
             user = new UserData(words[1], words[2], null);
             auth = server.login(user);
-            System.out.println("Logged in as " + auth.username());
+            if(auth.authToken() != null){
+                System.out.println("Logged in as " + auth.username());
+            } else{
+                throw new Exception("Authentication error!");
+            }
             return auth;
         } else if(words[0].toLowerCase().equals("help")){
             System.out.println(help);

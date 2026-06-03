@@ -57,8 +57,7 @@ public class ChessClient {
                     }
                 }
             } catch(Exception e){
-                System.out.println(e);
-                System.out.println("Error occurred! Please try again.");
+                System.out.println(e.getMessage() + " Please try again.");
             }
         }
     }
