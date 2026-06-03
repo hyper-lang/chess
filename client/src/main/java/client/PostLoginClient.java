@@ -10,8 +10,8 @@ public class PostLoginClient {
     private AuthData auth;
     private String help;
 
-    public PostLoginClient(String url, AuthData auth){
-        server = new ServerFacade(url);
+    public PostLoginClient(ServerFacade server, AuthData auth){
+        this.server = server;
         this.auth = auth;
         help = """
                 create <NAME>
@@ -25,6 +25,7 @@ public class PostLoginClient {
     }
 
     //add error handling
+    //map display numbers to game numbers
     public boolean postLoginInput(String input) throws Exception {
         String[] words = input.split("\\s+");
 

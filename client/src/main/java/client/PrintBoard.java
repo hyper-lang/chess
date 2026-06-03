@@ -5,7 +5,6 @@ import ui.EscapeSequences;
 
 public class PrintBoard {
     private static String[] letters = {"a", "b", "c", "d", "e", "f", "g", "h"};
-    private static String[] numbers = {"1", "2", "3", "4", "5", "6", "7", "8"};
 
     public static void printBoard(ChessBoard board, boolean isWhite){
         int step = isWhite ? 1 : -1;

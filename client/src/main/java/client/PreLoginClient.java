@@ -7,8 +7,8 @@ public class PreLoginClient {
     private ServerFacade server;
     private String help;
     
-    public PreLoginClient(String url){
-        server = new ServerFacade(url);
+    public PreLoginClient(ServerFacade server){
+        this.server = server;
         help = """
                 register <username> <password> <email>
                 login <username> <password>
