@@ -27,11 +27,30 @@ public class ChessClient {
                 if(loggedIn){
                     System.out.print("[LOGGED_IN] >>> ");
                     input = scanner.nextLine();
-                    running = postLoginClient.postLoginInput(input);
+
+                    if(input.toLowerCase().startsWith("quit")){
+                        running = false;
+                        System.out.println("Thanks for playing!");
+                        break;
+                    }
+
+                    auth = postLoginClient.postLoginInput(input);
+
+                    if(auth == null){
+                        loggedIn = false;
+                    }
                 } else{
                     System.out.print("[LOGGED_OUT] >>> ");
                     input = scanner.nextLine();
+
+                    if(input.toLowerCase().startsWith("quit")){
+                        running = false;
+                        System.out.println("Thanks for playing!");
+                        break;
+                    }
+
                     auth = preLoginClient.preLoginInput(input);
+
                     if(auth != null){
                         loggedIn = true;
                         postLoginClient = new PostLoginClient(server, auth);

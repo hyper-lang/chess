@@ -28,8 +28,8 @@ public class PostLoginClient {
                 """;
     }
 
-    //add error handling
-    public boolean postLoginInput(String input) throws Exception {
+    //add error handling/input validation
+    public AuthData postLoginInput(String input) throws Exception {
         String[] words = input.split("\\s+");
 
         if(words[0].toLowerCase().equals("create")){
@@ -41,22 +41,26 @@ public class PostLoginClient {
             gameList.clear();
             for(GameData i : games){
                 System.out.println(index + " " + i.gameName());
+                System.out.println("  white: " + i.whiteUsername());
+                System.out.println("  black: " + i.blackUsername());
                 gameList.put(index, i);
                 index += 1;
             }
         } else if(words[0].toLowerCase().equals("join")){
-            int gameID = Integer.parseInt(words[1]);
+            int listID = Integer.parseInt(words[1]);
             String color = words[2].toUpperCase();
-            server.joinGame(auth, color, gameID);
+            server.joinGame(auth, color, gameList.get(listID).gameID());
         } else if(words[0].toLowerCase().equals("observe")){
-            int gameID = Integer.parseInt(words[1]);
+            int listID = Integer.parseInt(words[1]);
             //rest to be implemented in phase 6
         } else if(words[0].toLowerCase().equals("logout")){
             server.logout(auth);
-            return false;
+            return null;
+        } else if(words[0].toLowerCase().equals("quit")){
+            ;
         } else if(words[0].toLowerCase().equals("help")){
             System.out.println(help);
         }
-        return true;
+        return auth;
     }
 }

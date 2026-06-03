@@ -23,6 +23,7 @@ public class PreLoginClient {
         AuthData auth;
 
         //add error handling
+        //remove error printing when finished
         if(words[0].toLowerCase().equals("register")){
             user = new UserData(words[1], words[2], words[3]);
             auth = server.register(user);
