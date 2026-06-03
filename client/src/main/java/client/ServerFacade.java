@@ -47,7 +47,8 @@ public class ServerFacade {
     public AuthData register(UserData user) throws Exception {
         var response = sendRequest("POST", url + "/user", null, gson.toJson(user));
         if (response.statusCode() != 200) {
-            throw new Exception(response.body());
+            JsonObject obj = JsonParser.parseString(response.body()).getAsJsonObject();
+            throw new Exception(obj.get("message").getAsString());
         }
         return gson.fromJson(response.body(), AuthData.class);
     }
@@ -56,7 +57,8 @@ public class ServerFacade {
         var response = sendRequest("POST", url + "/session", null, gson.toJson(user));
 
         if (response.statusCode() != 200) {
-            throw new Exception(response.body());
+            JsonObject obj = JsonParser.parseString(response.body()).getAsJsonObject();
+            throw new Exception(obj.get("message").getAsString());
         }
 
         return gson.fromJson(response.body(), AuthData.class);
@@ -66,7 +68,8 @@ public class ServerFacade {
         var response = sendRequest("DELETE", url + "/session", new String[]{"authorization", auth.authToken()}, null);
 
         if (response.statusCode() != 200) {
-            throw new Exception(response.body());
+            JsonObject obj = JsonParser.parseString(response.body()).getAsJsonObject();
+            throw new Exception(obj.get("message").getAsString());
         }
     }
     
@@ -77,7 +80,8 @@ public class ServerFacade {
         var response = sendRequest("POST", url + "/game", new String[]{"authorization", auth.authToken()}, body.toString());
 
         if (response.statusCode() != 200) {
-            throw new Exception(response.body());
+            JsonObject obj = JsonParser.parseString(response.body()).getAsJsonObject();
+            throw new Exception(obj.get("message").getAsString());
         }
 
         JsonObject json = JsonParser.parseString(response.body()).getAsJsonObject();
@@ -88,7 +92,8 @@ public class ServerFacade {
         var response = sendRequest("GET", url + "/game", new String[]{"authorization", auth.authToken()}, null);
 
         if (response.statusCode() != 200) {
-            throw new Exception(response.body());
+            JsonObject obj = JsonParser.parseString(response.body()).getAsJsonObject();
+            throw new Exception(obj.get("message").getAsString());
         }
 
         JsonObject json = JsonParser.parseString(response.body()).getAsJsonObject();
@@ -110,7 +115,8 @@ public class ServerFacade {
         var response = sendRequest("PUT", url + "/game", new String[]{"authorization", auth.authToken()}, body.toString());
 
         if (response.statusCode() != 200) {
-            throw new Exception(response.body());
+            JsonObject obj = JsonParser.parseString(response.body()).getAsJsonObject();
+            throw new Exception(obj.get("message").getAsString());
         }
     }
 

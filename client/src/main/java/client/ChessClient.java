@@ -57,7 +57,7 @@ public class ChessClient {
                     }
                 }
             } catch(Exception e){
-                System.out.println(e.getMessage() + " Please try again.");
+                System.out.println(e.getMessage() + "\nPlease try again.");
             }
         }
     }

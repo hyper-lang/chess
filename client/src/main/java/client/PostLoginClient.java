@@ -51,6 +51,9 @@ public class PostLoginClient {
                 gameList.put(index, i);
                 index += 1;
             }
+            if(games.size() == 0){
+                System.out.println("No games!");
+            }
         } else if(words[0].toLowerCase().equals("join")){
             if(words.length != 3){
                 throw new Exception("Incorrect amount of arguments!");
