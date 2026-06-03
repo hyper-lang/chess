@@ -21,12 +21,16 @@ public class PreLoginClient {
         String[] words = input.split("\\s+");
         UserData user;
 
+        //add error handling
         if(words[0].toLowerCase().equals("register")){
             user = new UserData(words[1], words[2], words[3]);
+            System.out.println("Registered!");
             return server.register(user);
         } else if(words[0].toLowerCase().equals("login")){
             user = new UserData(words[1], words[2], null);
-            return server.login(user);
+            AuthData auth = server.login(user);
+            System.out.println("Logged in as " + auth.username());
+            return auth;
         } else if(words[0].toLowerCase().equals("help")){
             System.out.println(help);
             return null;

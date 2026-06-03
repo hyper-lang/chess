@@ -24,6 +24,7 @@ public class PostLoginClient {
                 """;
     }
 
+    //add error handling
     public boolean postLoginInput(String input) throws Exception {
         String[] words = input.split("\\s+");
 

@@ -1,5 +1,88 @@
 package client;
 
+import chess.*;
+import ui.EscapeSequences;
+
 public class PrintBoard {
-    
+    private static String[] letters = {"a", "b", "c", "d", "e", "f", "g", "h"};
+    private static String[] numbers = {"1", "2", "3", "4", "5", "6", "7", "8"};
+
+    public static void printBoard(ChessBoard board, boolean isWhite){
+        int step = isWhite ? 1 : -1;
+        int start = isWhite ? 0 : 7;
+        int end = isWhite ? 8 : -1;
+        ChessPiece piece;
+        String pieceColor;
+
+        letterRow(step, start, end);
+        for(int i = start; i != end; i += step){
+            printBorder(numbers[i]);
+            for(int j = start; j != end; j += step){
+                piece = board.getPiece(new ChessPosition(i + 1, j + 1));
+                if(piece == null){
+                    pieceColor = EscapeSequences.SET_BG_COLOR_DARK_GREY;
+                } else{
+                    pieceColor = piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.SET_TEXT_COLOR_LIGHT_GREY : EscapeSequences.SET_TEXT_COLOR_RED;
+                }
+
+                if((i + j) % 2 == 0){
+                    printWhite(pieceSymbol(piece), pieceColor);
+                }else{
+                    printBlack(pieceSymbol(piece), pieceColor);
+                }
+            }
+
+            printBorder(numbers[i]);
+            System.out.println();
+        }
+        letterRow(step, start, end);
+    }
+
+    private static String pieceSymbol(ChessPiece piece){
+        if(piece == null || piece.getTeamColor() == null){
+            return " ";
+        }
+        if(piece.getTeamColor() == ChessGame.TeamColor.WHITE){
+            return switch(piece.getPieceType()){
+                case ChessPiece.PieceType.KING -> EscapeSequences.WHITE_KING;
+                case ChessPiece.PieceType.QUEEN -> EscapeSequences.WHITE_QUEEN;
+                case ChessPiece.PieceType.ROOK -> EscapeSequences.WHITE_ROOK;
+                case ChessPiece.PieceType.KNIGHT -> EscapeSequences.WHITE_KNIGHT;
+                case ChessPiece.PieceType.BISHOP -> EscapeSequences.WHITE_BISHOP;
+                case ChessPiece.PieceType.PAWN -> EscapeSequences.WHITE_PAWN;
+                default -> " ";
+            };
+        } else {
+            return switch(piece.getPieceType()){
+                case ChessPiece.PieceType.KING -> EscapeSequences.BLACK_KING;
+                case ChessPiece.PieceType.QUEEN -> EscapeSequences.BLACK_QUEEN;
+                case ChessPiece.PieceType.ROOK -> EscapeSequences.BLACK_ROOK;
+                case ChessPiece.PieceType.KNIGHT -> EscapeSequences.BLACK_KNIGHT;
+                case ChessPiece.PieceType.BISHOP -> EscapeSequences.BLACK_BISHOP;
+                case ChessPiece.PieceType.PAWN -> EscapeSequences.BLACK_PAWN;
+                default -> " ";
+            };
+        }
+    }
+
+    private static void printBorder(String content){
+        System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY + " " + content + " " + EscapeSequences.RESET_BG_COLOR);
+    }
+
+    private static void printWhite(String content, String textColor){
+        System.out.print(EscapeSequences.SET_BG_COLOR_WHITE + textColor + " " + content + " " + EscapeSequences.RESET_TEXT_COLOR + EscapeSequences.RESET_BG_COLOR);
+    }
+
+    private static void printBlack(String content, String textColor){
+        System.out.print(EscapeSequences.SET_BG_COLOR_BLACK + textColor + " " + content + " " + EscapeSequences.RESET_TEXT_COLOR + EscapeSequences.RESET_BG_COLOR);
+    }
+
+    private static void letterRow(int step, int start, int end){
+        printBorder(" ");
+        for(int i = start; i != end; i += step){
+            printBorder(letters[i]);
+        }
+        printBorder(" ");
+        System.out.println();
+    }
 }
