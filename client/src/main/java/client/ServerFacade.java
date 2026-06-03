@@ -59,7 +59,7 @@ public class ServerFacade {
     public int createGame(AuthData auth, String gameName) throws Exception {
         JsonObject body = new JsonObject();
         body.addProperty("gameName", gameName);
-        String response = sendRequest("POST", url + "/game", new String[]{"authorization", auth.authToken()}, null).body();
+        String response = sendRequest("POST", url + "/game", new String[]{"authorization", auth.authToken()}, body.toString()).body();
         JsonObject json = JsonParser.parseString(response).getAsJsonObject();
         return json.get("gameID").getAsInt();
     }

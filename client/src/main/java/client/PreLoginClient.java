@@ -20,15 +20,17 @@ public class PreLoginClient {
     public AuthData preLoginInput(String input) throws Exception {
         String[] words = input.split("\\s+");
         UserData user;
+        AuthData auth;
 
         //add error handling
         if(words[0].toLowerCase().equals("register")){
             user = new UserData(words[1], words[2], words[3]);
+            auth = server.register(user);
             System.out.println("Registered!");
-            return server.register(user);
+            return auth;
         } else if(words[0].toLowerCase().equals("login")){
             user = new UserData(words[1], words[2], null);
-            AuthData auth = server.login(user);
+            auth = server.login(user);
             System.out.println("Logged in as " + auth.username());
             return auth;
         } else if(words[0].toLowerCase().equals("help")){

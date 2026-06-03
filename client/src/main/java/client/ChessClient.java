@@ -27,13 +27,18 @@ public class ChessClient {
                 if(loggedIn){
                     System.out.print("[LOGGED_IN] >>> ");
                     input = scanner.nextLine();
-                    postLoginClient.postLoginInput(input);
+                    running = postLoginClient.postLoginInput(input);
                 } else{
                     System.out.print("[LOGGED_OUT] >>> ");
                     input = scanner.nextLine();
                     auth = preLoginClient.preLoginInput(input);
+                    if(auth != null){
+                        loggedIn = true;
+                        postLoginClient = new PostLoginClient(server, auth);
+                    }
                 }
             } catch(Exception e){
+                System.out.println(e);
                 System.out.println("Error occurred! Please try again.");
             }
         }

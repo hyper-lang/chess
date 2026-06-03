@@ -10,6 +10,8 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Map;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import io.javalin.json.JsonMapper;
 import org.jetbrains.annotations.NotNull;
 
@@ -37,7 +39,7 @@ public class Server {
         gameService = new GameService(authDAO, gameDAO);
         clearService = new ClearService(userDAO, authDAO, gameDAO);
 
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
         JsonMapper gsonMapper = new JsonMapper() {
             @NotNull
             @Override
