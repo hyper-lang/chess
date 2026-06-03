@@ -9,6 +9,6 @@ public class ClientMain {
         // System.out.println("♕ 240 Chess Client: " + piece);
         ChessBoard board = new ChessBoard();
         board.resetBoard();
-        PrintBoard.printBoard(board, false);
+        PrintBoard.printBoard(board, true);
     }
 }

@@ -11,28 +11,39 @@ public class PrintBoard {
         int step = isWhite ? 1 : -1;
         int start = isWhite ? 0 : 7;
         int end = isWhite ? 8 : -1;
-        ChessPiece piece;
-        String pieceColor;
 
         letterRow(step, start, end);
-        for(int i = start; i != end; i += step){
-            printBorder(numbers[i]);
-            for(int j = start; j != end; j += step){
-                piece = board.getPiece(new ChessPosition(i + 1, j + 1));
-                if(piece == null){
-                    pieceColor = EscapeSequences.SET_BG_COLOR_DARK_GREY;
-                } else{
+        for (int i = 0; i < 8; i++) {
+            int displayRank = isWhite ? 8 - i : i + 1;
+            printBorder(String.valueOf(displayRank));
+            for (int j = 0; j < 8; j++) {
+                int row;
+                int col;
+
+                if (isWhite) {
+                    row = 8 - i;
+                    col = j + 1;
+                } else {
+                    row = i + 1;
+                    col = 8 - j;
+                }
+                
+                ChessPiece piece = board.getPiece(new ChessPosition(row, col));
+                String pieceColor;
+
+                if (piece == null) {
+                    pieceColor = EscapeSequences.SET_TEXT_COLOR_DARK_GREY;
+                } else {
                     pieceColor = piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.SET_TEXT_COLOR_LIGHT_GREY : EscapeSequences.SET_TEXT_COLOR_RED;
                 }
 
-                if((i + j) % 2 == 0){
+                if ((row + col) % 2 == 1) {
                     printWhite(pieceSymbol(piece), pieceColor);
-                }else{
+                } else {
                     printBlack(pieceSymbol(piece), pieceColor);
                 }
             }
-
-            printBorder(numbers[i]);
+            printBorder(String.valueOf(displayRank));
             System.out.println();
         }
         letterRow(step, start, end);
@@ -40,7 +51,7 @@ public class PrintBoard {
 
     private static String pieceSymbol(ChessPiece piece){
         if(piece == null || piece.getTeamColor() == null){
-            return " ";
+            return "   ";
         }
         if(piece.getTeamColor() == ChessGame.TeamColor.WHITE){
             return switch(piece.getPieceType()){
@@ -70,11 +81,11 @@ public class PrintBoard {
     }
 
     private static void printWhite(String content, String textColor){
-        System.out.print(EscapeSequences.SET_BG_COLOR_WHITE + textColor + " " + content + " " + EscapeSequences.RESET_TEXT_COLOR + EscapeSequences.RESET_BG_COLOR);
+        System.out.print(EscapeSequences.SET_BG_COLOR_WHITE + textColor + content + EscapeSequences.RESET_TEXT_COLOR + EscapeSequences.RESET_BG_COLOR);
     }
 
     private static void printBlack(String content, String textColor){
-        System.out.print(EscapeSequences.SET_BG_COLOR_BLACK + textColor + " " + content + " " + EscapeSequences.RESET_TEXT_COLOR + EscapeSequences.RESET_BG_COLOR);
+        System.out.print(EscapeSequences.SET_BG_COLOR_BLACK + textColor + content + EscapeSequences.RESET_TEXT_COLOR + EscapeSequences.RESET_BG_COLOR);
     }
 
     private static void letterRow(int step, int start, int end){
