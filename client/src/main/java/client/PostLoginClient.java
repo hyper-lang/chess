@@ -4,15 +4,19 @@ import model.AuthData;
 import model.GameData;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class PostLoginClient {
     private ServerFacade server;
     private AuthData auth;
     private String help;
+    private Map<Integer, GameData> gameList;
 
     public PostLoginClient(ServerFacade server, AuthData auth){
         this.server = server;
         this.auth = auth;
+        gameList = new HashMap<>();
         help = """
                 create <NAME>
                 list
@@ -25,7 +29,6 @@ public class PostLoginClient {
     }
 
     //add error handling
-    //map display numbers to game numbers
     public boolean postLoginInput(String input) throws Exception {
         String[] words = input.split("\\s+");
 
@@ -35,8 +38,10 @@ public class PostLoginClient {
         } else if(words[0].toLowerCase().equals("list")){
             Collection<GameData> games = server.listGames(auth);
             int index = 1;
+            gameList.clear();
             for(GameData i : games){
                 System.out.println(index + " " + i.gameName());
+                gameList.put(index, i);
                 index += 1;
             }
         } else if(words[0].toLowerCase().equals("join")){
