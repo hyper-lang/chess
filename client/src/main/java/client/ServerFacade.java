@@ -45,33 +45,60 @@ public class ServerFacade {
     }
 
     public AuthData register(UserData user) throws Exception {
-        return gson.fromJson(sendRequest("POST", url + "/user", null, gson.toJson(user)).body(), AuthData.class);
+        var response = sendRequest("POST", url + "/user", null, gson.toJson(user));
+        if (response.statusCode() != 200) {
+            throw new Exception(response.body());
+        }
+        return gson.fromJson(response.body(), AuthData.class);
     }
 
     public AuthData login(UserData user) throws Exception {
-        return gson.fromJson(sendRequest("POST", url + "/session", null, gson.toJson(user)).body(), AuthData.class);
+        var response = sendRequest("POST", url + "/session", null, gson.toJson(user));
+
+        if (response.statusCode() != 200) {
+            throw new Exception(response.body());
+        }
+
+        return gson.fromJson(response.body(), AuthData.class);
     }
 
     public void logout(AuthData auth) throws Exception {
-        sendRequest("DELETE", url + "/session", new String[]{"authorization", auth.authToken()}, null);
+        var response = sendRequest("DELETE", url + "/session", new String[]{"authorization", auth.authToken()}, null);
+
+        if (response.statusCode() != 200) {
+            throw new Exception(response.body());
+        }
     }
     
     public int createGame(AuthData auth, String gameName) throws Exception {
         JsonObject body = new JsonObject();
         body.addProperty("gameName", gameName);
-        String response = sendRequest("POST", url + "/game", new String[]{"authorization", auth.authToken()}, body.toString()).body();
-        JsonObject json = JsonParser.parseString(response).getAsJsonObject();
+
+        var response = sendRequest("POST", url + "/game", new String[]{"authorization", auth.authToken()}, body.toString());
+
+        if (response.statusCode() != 200) {
+            throw new Exception(response.body());
+        }
+
+        JsonObject json = JsonParser.parseString(response.body()).getAsJsonObject();
         return json.get("gameID").getAsInt();
     }
 
     public Collection<GameData> listGames(AuthData auth) throws Exception {
-        String response = sendRequest("GET", url + "/game", new String[]{"authorization", auth.authToken()}, null).body();
-        JsonObject json = JsonParser.parseString(response).getAsJsonObject();
+        var response = sendRequest("GET", url + "/game", new String[]{"authorization", auth.authToken()}, null);
+
+        if (response.statusCode() != 200) {
+            throw new Exception(response.body());
+        }
+
+        JsonObject json = JsonParser.parseString(response.body()).getAsJsonObject();
         JsonArray gamesJson = json.getAsJsonArray("games");
+
         Collection<GameData> games = new ArrayList<>();
-        for(JsonElement i : gamesJson){
+        for (JsonElement i : gamesJson) {
             games.add(gson.fromJson(i, GameData.class));
         }
+
         return games;
     }
 
@@ -79,6 +106,15 @@ public class ServerFacade {
         JsonObject body = new JsonObject();
         body.addProperty("playerColor", playercolor);
         body.addProperty("gameID", gameID);
-        sendRequest("PUT", url + "/game", new String[]{"authorization", auth.authToken()}, body.toString());
+
+        var response = sendRequest("PUT", url + "/game", new String[]{"authorization", auth.authToken()}, body.toString());
+
+        if (response.statusCode() != 200) {
+            throw new Exception(response.body());
+        }
+    }
+
+    public void clear() throws Exception {
+        sendRequest("DELETE", url + "/db", null, null);
     }
 }

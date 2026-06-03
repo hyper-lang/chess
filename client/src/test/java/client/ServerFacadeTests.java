@@ -14,11 +14,16 @@ public class ServerFacadeTests {
     private static ServerFacade facade;
 
     @BeforeAll
-    public static void init() {
+    public static void init() throws Exception {
         server = new Server();
         var port = server.run(0);
         System.out.println("Started test HTTP server on " + port);
         facade = new ServerFacade("http://localhost:" + Integer.toString(port));
+    }
+
+    @BeforeEach
+    public void clearDatabase() throws Exception {
+        facade.clear();
     }
 
     @AfterAll
@@ -37,25 +42,23 @@ public class ServerFacadeTests {
     @Test
     public void registerNegative() throws Exception {
         facade.register(new UserData("bob", "bob", "bob"));
-        AuthData auth = facade.register(new UserData("bob", "bob", "bob"));
-        assertNull(auth.authToken());
+        assertThrows(Exception.class, () -> facade.register(new UserData("bob", "bob", "bob")));
     }
 
     @Test
     public void loginPositive() throws Exception {
-        AuthData auth = facade.login(new UserData("bob", "bob", "bob"));
+        AuthData auth = facade.register(new UserData("bob", "bob", "bob"));
         assertNotNull(auth.authToken());
     }
 
     @Test
     public void loginNegative() throws Exception {
-        AuthData auth = facade.login(new UserData("bob", "bob", "bob"));
-        assertNotNull(auth.authToken());
+        assertThrows(Exception.class, () -> facade.login(new UserData("fake", "fake", "fake")));
     }
 
     @Test
     public void logoutPositive() throws Exception {
-        AuthData auth = facade.login(new UserData("bob", "bob", "bob"));
+        AuthData auth = facade.register(new UserData("bob", "bob", "bob"));
         assertDoesNotThrow(() -> facade.logout(auth));
     }
 
@@ -66,7 +69,7 @@ public class ServerFacadeTests {
 
     @Test
     public void createGamePositive() throws Exception {
-        AuthData auth = facade.login(new UserData("bob", "bob", "bob"));
+        AuthData auth = facade.register(new UserData("bob", "bob", "bob"));
         assertDoesNotThrow(() -> facade.createGame(auth, "hype_game"));
     }
 
@@ -77,7 +80,7 @@ public class ServerFacadeTests {
 
     @Test
     public void listGamesPositive() throws Exception {
-        AuthData auth = facade.login(new UserData("bob", "bob", "bob"));
+        AuthData auth = facade.register(new UserData("bob", "bob", "bob"));
         assertDoesNotThrow(() -> facade.listGames(auth));
     }
 
@@ -88,14 +91,14 @@ public class ServerFacadeTests {
 
     @Test
     public void joinGamePositive() throws Exception {
-        AuthData auth = facade.login(new UserData("bob", "bob", "bob"));
+        AuthData auth = facade.register(new UserData("bob", "bob", "bob"));
         int gameInt = facade.createGame(auth, "new_game_created");
         assertDoesNotThrow(() -> facade.joinGame(auth, "WHITE", gameInt));
     }
 
     @Test
     public void joinGameNegative() throws Exception {
-        AuthData auth = facade.login(new UserData("bob", "bob", "bob"));
-        assertDoesNotThrow(() -> facade.joinGame(auth, "WHITE", 1000));
+        AuthData auth = facade.register(new UserData("bob", "bob", "bob"));
+        assertThrows(Exception.class, () -> facade.joinGame(auth, "WHITE", 1000));
     }
 }
