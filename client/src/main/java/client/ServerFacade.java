@@ -19,7 +19,7 @@ import com.google.gson.JsonParser;
 import java.util.ArrayList;
 
 public class ServerFacade {
-    private static final HttpClient httpClient = HttpClient.newHttpClient();
+    private static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
     private final Gson gson = new Gson();
     private String url;
 
@@ -33,7 +33,7 @@ public class ServerFacade {
             requestBuilder.header(header[0], header[1]);
         }
         var request = requestBuilder.build();
-        return httpClient.send(request, BodyHandlers.ofString());
+        return HTTP_CLIENT.send(request, BodyHandlers.ofString());
     }
 
     private static BodyPublisher requestBodyPublisher(String body) throws IOException {

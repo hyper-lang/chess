@@ -33,7 +33,9 @@ public class PrintBoard {
                 if (piece == null) {
                     pieceColor = EscapeSequences.SET_TEXT_COLOR_DARK_GREY;
                 } else {
-                    pieceColor = piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.SET_TEXT_COLOR_LIGHT_GREY : EscapeSequences.SET_TEXT_COLOR_RED;
+                    pieceColor = piece.getTeamColor() == ChessGame.TeamColor.WHITE
+                    ? EscapeSequences.SET_TEXT_COLOR_LIGHT_GREY
+                    : EscapeSequences.SET_TEXT_COLOR_RED;
                 }
 
                 if ((row + col) % 2 == 1) {
@@ -76,15 +78,18 @@ public class PrintBoard {
     }
 
     private static void printBorder(String content){
-        System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY + " " + content + " " + EscapeSequences.RESET_BG_COLOR);
+        System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY + " "
+        + content + " " + EscapeSequences.RESET_BG_COLOR);
     }
 
     private static void printWhite(String content, String textColor){
-        System.out.print(EscapeSequences.SET_BG_COLOR_WHITE + textColor + content + EscapeSequences.RESET_TEXT_COLOR + EscapeSequences.RESET_BG_COLOR);
+        System.out.print(EscapeSequences.SET_BG_COLOR_WHITE + textColor
+        + content + EscapeSequences.RESET_TEXT_COLOR + EscapeSequences.RESET_BG_COLOR);
     }
 
     private static void printBlack(String content, String textColor){
-        System.out.print(EscapeSequences.SET_BG_COLOR_BLACK + textColor + content + EscapeSequences.RESET_TEXT_COLOR + EscapeSequences.RESET_BG_COLOR);
+        System.out.print(EscapeSequences.SET_BG_COLOR_BLACK + textColor
+        + content + EscapeSequences.RESET_TEXT_COLOR + EscapeSequences.RESET_BG_COLOR);
     }
 
     private static void letterRow(int step, int start, int end){
