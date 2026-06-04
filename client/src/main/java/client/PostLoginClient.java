@@ -6,6 +6,7 @@ import model.GameData;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 public class PostLoginClient {
     private ServerFacade server;
@@ -71,14 +72,28 @@ public class PostLoginClient {
                 gameList.put(index, i);
                 index += 1;
             }
+            if(gameList.get(listID) == null){
+                throw new Exception("Game doesn't exist!");
+            }
             server.joinGame(auth, color, gameList.get(listID).gameID());
-            
+            boolean isWhite = color.equals("WHITE");
+            PrintBoard.printBoard(gameList.get(listID).game().getBoard(), isWhite);
         } else if(words[0].toLowerCase().equals("observe")){
             if(words.length != 2){
                 throw new Exception("Incorrect amount of arguments!");
             }
             int listID = Integer.parseInt(words[1]);
-            //rest to be implemented in phase 6
+            int index =  1;
+            games = server.listGames(auth);
+            gameList.clear();
+            for(GameData i : games){
+                gameList.put(index, i);
+                index += 1;
+            }
+            if(gameList.get(listID) == null){
+                throw new Exception("Game doesn't exist!");
+            }
+            PrintBoard.printBoard(gameList.get(listID).game().getBoard(), true);
         } else if(words[0].toLowerCase().equals("logout")){
             server.logout(auth);
             return null;
