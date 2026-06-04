@@ -12,6 +12,7 @@ public class PostLoginClient {
     private AuthData auth;
     private String help;
     private Map<Integer, GameData> gameList;
+    Collection<GameData> games;
 
     public PostLoginClient(ServerFacade server, AuthData auth){
         this.server = server;
@@ -41,7 +42,7 @@ public class PostLoginClient {
             if(words.length != 1){
                 throw new Exception("Incorrect amount of arguments!");
             }
-            Collection<GameData> games = server.listGames(auth);
+            games = server.listGames(auth);
             int index = 1;
             gameList.clear();
             for(GameData i : games){
@@ -58,12 +59,20 @@ public class PostLoginClient {
             if(words.length != 3){
                 throw new Exception("Incorrect amount of arguments!");
             }
-            if(!words[2].toLowerCase().equals("white") || !words[2].toLowerCase().equals("black")){
+            String color = words[2].replaceAll("[^a-zA-Z]", "").toUpperCase().trim();
+            if(!color.equals("WHITE") && !color.equals("BLACK")){
                 throw new Exception("Color must be 'WHITE' or 'BLACK'!");
             }
             int listID = Integer.parseInt(words[1]);
-            String color = words[2].toUpperCase();
+            int index = 1;
+            games = server.listGames(auth);
+            gameList.clear();
+            for(GameData i : games){
+                gameList.put(index, i);
+                index += 1;
+            }
             server.joinGame(auth, color, gameList.get(listID).gameID());
+            
         } else if(words[0].toLowerCase().equals("observe")){
             if(words.length != 2){
                 throw new Exception("Incorrect amount of arguments!");
