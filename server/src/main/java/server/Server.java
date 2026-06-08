@@ -14,6 +14,7 @@ import com.google.gson.GsonBuilder;
 
 import io.javalin.json.JsonMapper;
 import io.javalin.websocket.WsContext;
+import io.javalin.websocket.WsMessageContext;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -183,8 +184,8 @@ public class Server {
         ctx.json(Map.of("message", "Error: " + msg));
     }
 
-    private void onMessage(WsContext ctx){
-        System.out.println(ctx);
+    private void onMessage(WsMessageContext ctx){
+        System.out.println(ctx.message());
     }
 
     public static class UserRequest {
