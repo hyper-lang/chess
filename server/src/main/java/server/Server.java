@@ -20,7 +20,6 @@ import org.jetbrains.annotations.NotNull;
 public class Server {
 
     private final Javalin javalin;
-    private WebsocketHandler websocketHandler;
 
     private UserService userService;
     private GameService gameService;
@@ -30,8 +29,6 @@ public class Server {
     private GameDAO gameDAO;
 
     public Server() {
-        websocketHandler = new WebsocketHandler();
-
         try{
             userDAO = new DatabaseUserDAO();
             authDAO = new DatabaseAuthDAO();
