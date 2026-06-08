@@ -13,11 +13,14 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import io.javalin.json.JsonMapper;
+import io.javalin.websocket.WsContext;
+
 import org.jetbrains.annotations.NotNull;
 
 public class Server {
 
     private final Javalin javalin;
+    private WebsocketHandler websocketHandler;
 
     private UserService userService;
     private GameService gameService;
@@ -27,6 +30,8 @@ public class Server {
     private GameDAO gameDAO;
 
     public Server() {
+        websocketHandler = new WebsocketHandler();
+
         try{
             userDAO = new DatabaseUserDAO();
             authDAO = new DatabaseAuthDAO();
@@ -66,6 +71,12 @@ public class Server {
         javalin.get("/game", this::listGames);
         javalin.post("/game", this::createGame);
         javalin.put("/game", this::joinGame);
+
+        javalin.ws("/ws", ws -> {
+            ws.onConnect(ctx -> System.out.println("Connected"));
+            ws.onMessage(this::onMessage);
+            ws.onClose(ctx -> System.out.println("Closed"));
+        });
     }
 
     public int run(int desiredPort) {
@@ -173,6 +184,10 @@ public class Server {
             default -> ctx.status(500);
         }
         ctx.json(Map.of("message", "Error: " + msg));
+    }
+
+    private void onMessage(WsContext ctx){
+        System.out.println(ctx);
     }
 
     public static class UserRequest {
