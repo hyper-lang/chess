@@ -8,7 +8,6 @@ import jakarta.websocket.Session;
 import jakarta.websocket.WebSocketContainer;
 
 import java.net.URI;
-import java.util.Scanner;
 
 public class WebsocketFacade extends Endpoint {
     public Session session;

@@ -6,6 +6,7 @@ import model.AuthData;
 
 public class ChessClient {
     private ServerFacade server;
+    private WebsocketFacade websocketFacade;
     private Scanner scanner = new Scanner(System.in);
 
     private PreLoginClient preLoginClient;
@@ -15,8 +16,9 @@ public class ChessClient {
     private boolean loggedIn = false;
     private boolean running = true;
 
-    public ChessClient(String url){
-        server = new ServerFacade(url);
+    public ChessClient(String url) throws Exception {
+        server = new ServerFacade("http://" + url);
+        websocketFacade = new WebsocketFacade("ws://" + url + "/ws");
         preLoginClient = new PreLoginClient(server);
     }
 
@@ -53,7 +55,7 @@ public class ChessClient {
 
                     if(auth != null){
                         loggedIn = true;
-                        postLoginClient = new PostLoginClient(server, auth);
+                        postLoginClient = new PostLoginClient(server, websocketFacade, auth);
                     }
                 }
             } catch(Exception e){
