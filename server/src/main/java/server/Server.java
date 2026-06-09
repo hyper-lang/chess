@@ -13,10 +13,12 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import io.javalin.json.JsonMapper;
-import io.javalin.websocket.WsContext;
 import io.javalin.websocket.WsMessageContext;
 
 import org.jetbrains.annotations.NotNull;
+
+import websocket.commands.UserGameCommand;
+import websocket.messages.ServerMessage;
 
 public class Server {
 
@@ -185,7 +187,14 @@ public class Server {
     }
 
     private void onMessage(WsMessageContext ctx){
-        System.out.println(ctx.message());
+        Gson wsGson = new Gson();
+        UserGameCommand gameCommand = wsGson.fromJson(ctx.message(), UserGameCommand.class);
+        switch(gameCommand.getCommandType()){
+            case CONNECT -> connect();
+            case MAKE_MOVE -> make_move();
+            case LEAVE -> leave();
+            case RESIGN -> resign();
+        }
     }
 
     public static class UserRequest {

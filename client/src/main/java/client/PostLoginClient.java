@@ -2,6 +2,7 @@ package client;
 
 import model.AuthData;
 import model.GameData;
+import websocket.commands.UserGameCommand;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -9,15 +10,15 @@ import java.util.Map;
 
 public class PostLoginClient {
     private ServerFacade server;
-    private WebsocketFacade websocketFacade;
+    private GameplayClient gameplayClient;
     private AuthData auth;
     private String help;
     private Map<Integer, GameData> gameList;
     Collection<GameData> games;
 
-    public PostLoginClient(ServerFacade server, WebsocketFacade websocketFacade, AuthData auth){
+    public PostLoginClient(ServerFacade server, GameplayClient gameplayClient, AuthData auth){
         this.server = server;
-        this.websocketFacade = websocketFacade;
+        this.gameplayClient = gameplayClient;
         this.auth = auth;
         gameList = new HashMap<>();
         help = """
@@ -95,9 +96,6 @@ public class PostLoginClient {
                 throw new Exception("Game doesn't exist!");
             }
             PrintBoard.printBoard(gameList.get(listID).game().getBoard(), true);
-            while(true){
-                websocketFacade.send(input);
-            }
         } else if(words[0].toLowerCase().equals("logout")){
             server.logout(auth);
             return null;
