@@ -6,8 +6,12 @@ import jakarta.websocket.EndpointConfig;
 import jakarta.websocket.MessageHandler;
 import jakarta.websocket.Session;
 import jakarta.websocket.WebSocketContainer;
-import websocket.commands.UserGameCommand;
+
+import websocket.commands.*;
 import websocket.messages.ServerMessage;
+
+import static websocket.messages.ServerMessage.ServerMessageType.ERROR;
+import static websocket.messages.ServerMessage.ServerMessageType.NOTIFICATION;
 
 import java.net.URI;
 
@@ -36,4 +40,12 @@ public class GameplayClient {
     }
 
     public void onOpen(Session session, EndpointConfig endpointConfig){}
+
+    public void message(ServerMessage serverMessage){
+        switch(serverMessage.getServerMessageType()){
+            case LOAD_GAME -> ;
+            case ERROR -> ;
+            case NOTIFICATION -> ;
+        }
+    }
 }
