@@ -300,13 +300,24 @@ public class Server {
         String username = authDAO.getAuth(gameCommand.getAuthToken()).username();
         GameData gameData = gameDAO.getGame(gameCommand.getGameID());
 
-        if(gameData.whiteUsername().equals(username)){
+        String newWhite = gameData.whiteUsername();
+        String newBlack = gameData.blackUsername();
+
+        if(username.equals(gameData.whiteUsername())) {
             gameSession.setWhite(null);
-        } else if(gameData.blackUsername().equals(username)){
+            newWhite = null;
+        } 
+        else if(username.equals(gameData.blackUsername())) {
             gameSession.setBlack(null);
-        } else{
+            newBlack = null;
+        } 
+        else{
             gameSession.removeObserver(ctx);
         }
+
+        GameData updated = new GameData(gameData.gameID(), newWhite, newBlack, gameData.gameName(), gameData.game());
+
+        gameDAO.updateGame(gameCommand.getGameID(), updated);
 
         broadcastExcept(gameCommand.getGameID(), ctx, new NotificationServerMessage(username + " left the game."));
     }
