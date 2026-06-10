@@ -10,16 +10,16 @@ public class ChessClient {
 
     private PreLoginClient preLoginClient;
     private PostLoginClient postLoginClient;
-    private GameplayClient gameplayClient;
     private AuthData auth;
 
     private boolean loggedIn = false;
     private boolean running = true;
+    private String url;
 
     public ChessClient(String url) throws Exception {
         server = new ServerFacade("http://" + url);
-        gameplayClient = new GameplayClient("ws://" + url + "/ws");
         preLoginClient = new PreLoginClient(server);
+        this.url = url;
     }
 
     public void run(){
@@ -55,7 +55,7 @@ public class ChessClient {
 
                     if(auth != null){
                         loggedIn = true;
-                        postLoginClient = new PostLoginClient(server, gameplayClient, auth);
+                        postLoginClient = new PostLoginClient(server, auth, url);
                     }
                 }
             } catch(Exception e){

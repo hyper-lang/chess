@@ -2,23 +2,27 @@ package client;
 
 import model.AuthData;
 import model.GameData;
+import websocket.commands.UserGameCommand;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.gson.Gson;
+
 public class PostLoginClient {
     private ServerFacade server;
+    private String url;
     private GameplayClient gameplayClient;
     private AuthData auth;
     private String help;
     private Map<Integer, GameData> gameList;
     Collection<GameData> games;
 
-    public PostLoginClient(ServerFacade server, GameplayClient gameplayClient, AuthData auth){
+    public PostLoginClient(ServerFacade server, AuthData auth, String url){
         this.server = server;
-        this.gameplayClient = gameplayClient;
         this.auth = auth;
+        this.url = url;
         gameList = new HashMap<>();
         help = """
                 create <NAME>
@@ -77,8 +81,9 @@ public class PostLoginClient {
                 throw new Exception("Game doesn't exist!");
             }
             server.joinGame(auth, color, gameList.get(listID).gameID());
-            boolean isWhite = color.equals("WHITE");
-            PrintBoard.printBoard(gameList.get(listID).game().getBoard(), isWhite);
+            // boolean isWhite = color.equals("WHITE");
+            gameplayClient = new GameplayClient("ws://" + url + "/ws");
+            gameplayClient.send(new UserGameCommand(UserGameCommand.CommandType.CONNECT, auth.authToken(), gameList.get(listID).gameID()));
         } else if(words[0].toLowerCase().equals("observe")){
             if(words.length != 2){
                 throw new Exception("Incorrect amount of arguments!");

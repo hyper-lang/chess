@@ -22,14 +22,6 @@ public class GameplayClient extends Endpoint {
         URI uri = new URI(url);
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
         session = container.connectToServer(this, uri);
-
-        this.session.addMessageHandler(new MessageHandler.Whole<String>() {
-            public void onMessage(String rawMessage) {
-                Gson gson = new Gson();
-                ServerMessage serverMessage = gson.fromJson(rawMessage, ServerMessage.class);
-                message(serverMessage, rawMessage);
-            }
-        });
     }
 
     public void send(UserGameCommand gameCommand) throws Exception {
@@ -37,9 +29,18 @@ public class GameplayClient extends Endpoint {
         session.getBasicRemote().sendText(gson.toJson(gameCommand));
     }
 
-    public void onOpen(Session session, EndpointConfig endpointConfig){}
+    public void onOpen(Session session, EndpointConfig endpointConfig){
+        this.session = session;
+
+        session.addMessageHandler((MessageHandler.Whole<String>) rawMessage -> {
+            Gson gson = new Gson();
+            ServerMessage serverMessage = gson.fromJson(rawMessage, ServerMessage.class);
+            message(serverMessage, rawMessage);
+        });
+    }
 
     public void message(ServerMessage serverMessage, String rawMessage){
+        System.out.println("WS RECEIVED: " + rawMessage);
         Gson gson = new Gson();
         switch(serverMessage.getServerMessageType()){
             case LOAD_GAME:
@@ -54,6 +55,9 @@ public class GameplayClient extends Endpoint {
                 NotificationServerMessage notificationServerMessage = gson.fromJson(rawMessage, NotificationServerMessage.class);
                 notification(notificationServerMessage);
                 break;
+            default:
+                System.out.println("defaulted");
+                break;
         }
     }
 
@@ -62,7 +66,7 @@ public class GameplayClient extends Endpoint {
     }
 
     public void error(ErrorServerMessage serverMessage){
-        System.out.println("Error! " + serverMessage.getMessage());
+        System.out.println(serverMessage.getMessage());
     }
 
     public void notification(NotificationServerMessage serverMessage){
