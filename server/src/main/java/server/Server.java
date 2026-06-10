@@ -13,6 +13,7 @@ import java.util.Map;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import chess.ChessGame;
 import io.javalin.json.JsonMapper;
 import io.javalin.websocket.WsMessageContext;
 
@@ -194,9 +195,13 @@ public class Server {
     private void onMessage(WsMessageContext ctx) throws Exception {
         Gson wsGson = new Gson();
         UserGameCommand gameCommand = wsGson.fromJson(ctx.message(), UserGameCommand.class);
+
         switch(gameCommand.getCommandType()){
             case CONNECT -> connect(ctx, gameCommand);
-            case MAKE_MOVE -> makeMove();
+            case MAKE_MOVE -> {
+                MoveUserGameCommand moveGameCommand = wsGson.fromJson(ctx.message(), MoveUserGameCommand.class);
+                makeMove(ctx, moveGameCommand);
+            }
             case LEAVE -> leave();
             case RESIGN -> resign();
         }
@@ -206,6 +211,12 @@ public class Server {
         GameSession session = sessions.computeIfAbsent(gameCommand.getGameID(), id -> new GameSession());
         GameData gameData = gameDAO.getGame(gameCommand.getGameID());
         String currentUsername = authDAO.getAuth(gameCommand.getAuthToken()).username();
+        Gson gson = new Gson();
+
+        if(currentUsername == null){
+            ctx.send(gson.toJson(new ErrorServerMessage("Error: unauthorized")));
+            return;
+        }
 
         if(gameData.whiteUsername() != null && gameData.whiteUsername().equals(currentUsername)){
             session.setWhite(ctx);
@@ -219,7 +230,34 @@ public class Server {
         broadcastExcept(gameCommand.getGameID(), ctx, notificationServerMessage);
     }
 
-    private void makeMove(){}
+    private void makeMove(WsMessageContext ctx, MoveUserGameCommand gameCommand) throws Exception {
+        Gson gson = new Gson();
+        String username = authDAO.getAuth(gameCommand.getAuthToken()).username();
+        GameSession session = sessions.get(gameCommand.getGameID());
+        GameData gameData = gameDAO.getGame(gameCommand.getGameID());
+        ChessGame.TeamColor color = gameData.whiteUsername().equals(username) ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
+        
+        if(gameData.game().getTeamTurn() != color){
+            ctx.send(gson.toJson(new ErrorServerMessage("Error: not your turn")));
+            return;
+        }
+
+        try{
+            gameData.game().makeMove(gameCommand.getMove());
+        } catch(Exception e){
+            ctx.send(gson.toJson(new ErrorServerMessage("Error: invalid move")));
+            return;
+        }
+
+        GameData updated = new GameData(gameData.gameID(), gameData.whiteUsername(),
+                                        gameData.blackUsername(), gameData.gameName(), gameData.game());
+
+        gameDAO.updateGame(gameCommand.getGameID(), updated);
+
+        broadcastExcept(gameCommand.getGameID(), null, new LoadServerMessage(updated.game()));
+
+        //check for check, checkmate, and stalemate still needs implementation
+    }
 
     private void leave(){}
 
