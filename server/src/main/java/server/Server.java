@@ -14,6 +14,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import chess.ChessGame;
+import chess.ChessGame.TeamColor;
 import io.javalin.json.JsonMapper;
 import io.javalin.websocket.WsContext;
 import io.javalin.websocket.WsMessageContext;
@@ -289,10 +290,34 @@ public class Server {
 
         gameDAO.updateGame(gameCommand.getGameID(), updated);
 
-        broadcastExcept(gameCommand.getGameID(), null, new LoadServerMessage(updated.game()));
-        broadcastExcept(gameCommand.getGameID(), ctx, new NotificationServerMessage(username + " moved " + updated.game().getBoard().getPiece(gameCommand.getMove().getEndPosition()).getPieceType().name()));
+        String pieceName = "piece";
+        var endPiece = gameData.game().getBoard().getPiece(gameCommand.getMove().getEndPosition());
+        if(endPiece != null) {
+            pieceName = endPiece.getPieceType().name();
+        }
 
+        ServerMessage notification = new NotificationServerMessage(username + " moved " + pieceName);
+
+        broadcastExcept(gameCommand.getGameID(), null, new LoadServerMessage(gameData.game()));
+
+        broadcastExcept(gameCommand.getGameID(), ctx, notification);
         //check for check, checkmate, and stalemate still needs implementation
+
+        if (gameData.game().isInCheckmate(TeamColor.BLACK) || gameData.game().isInCheckmate(TeamColor.WHITE)){
+            gameData.game().setIsOver(true);
+            broadcastExcept(gameCommand.getGameID(), null, new NotificationServerMessage("Checkmate!"));
+            return;
+        }
+
+        if (gameData.game().isInStalemate(TeamColor.WHITE) || gameData.game().isInStalemate(TeamColor.BLACK)){
+            gameData.game().setIsOver(true);
+            broadcastExcept(gameCommand.getGameID(), null, new NotificationServerMessage("Stalemate!"));
+            return;
+        }
+
+        if(gameData.game().isInCheck(TeamColor.WHITE) || gameData.game().isInCheck(TeamColor.BLACK)){
+                broadcastExcept(gameCommand.getGameID(), null, new NotificationServerMessage("Check!"));
+        }
     }
 
     private void leave(WsMessageContext ctx, UserGameCommand gameCommand) throws Exception {
