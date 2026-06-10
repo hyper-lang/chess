@@ -14,7 +14,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import chess.ChessGame;
-import chess.ChessMove;
 import io.javalin.json.JsonMapper;
 import io.javalin.websocket.WsContext;
 import io.javalin.websocket.WsMessageContext;
@@ -233,6 +232,8 @@ public class Server {
             return;
         }
 
+        session.removeIfPresent(ctx);
+
         if(gameData.whiteUsername() != null && gameData.whiteUsername().equals(currentUsername)){
             session.setWhite(ctx);
             role = "white";
@@ -260,7 +261,7 @@ public class Server {
         }
 
         String username = auth.username();
-        GameSession session = sessions.get(gameCommand.getGameID());
+        GameSession session = getSession(gameCommand.getGameID());
         GameData gameData = gameDAO.getGame(gameCommand.getGameID());
         //Technically an observer could craft makeMove socket commands, change the line below to prevent that
         ChessGame.TeamColor color = gameData.whiteUsername().equals(username) ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
@@ -290,7 +291,7 @@ public class Server {
     }
 
     private void leave(WsMessageContext ctx, UserGameCommand gameCommand) throws Exception {
-        GameSession gameSession = sessions.get(gameCommand.getGameID());
+        GameSession gameSession = getSession(gameCommand.getGameID());
         String username = authDAO.getAuth(gameCommand.getAuthToken()).username();
         GameData gameData = gameDAO.getGame(gameCommand.getGameID());
 
@@ -307,23 +308,33 @@ public class Server {
 
     private void resign(WsMessageContext ctx, UserGameCommand gameCommand) throws Exception {
         Gson gson = new Gson();
-        GameSession session = sessions.get(gameCommand.getGameID());
-        String username = authDAO.getAuth(gameCommand.getAuthToken()).username();
+        AuthData auth = authDAO.getAuth(gameCommand.getAuthToken());
+        if(auth == null) {
+            safeSend(ctx, gson.toJson(new ErrorServerMessage("Error: invalid auth")));
+            return;
+        }
+
+        String username = auth.username();
         GameData gameData = gameDAO.getGame(gameCommand.getGameID());
+
+        if(gameData == null) {
+            safeSend(ctx, gson.toJson(new ErrorServerMessage("Error: invalid gameID")));
+            return;
+        }
 
         if(gameData.game().getIsOver() == true){
             safeSend(ctx, gson.toJson(new ErrorServerMessage("Error: game already over")));
             return;
         }
 
-        session.getGame().setIsOver(true);
-        gameDAO.updateGame(gameCommand.getGameID(), new GameData(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), session.getGame()));
+        gameData.game().setIsOver(true);
+        gameDAO.updateGame(gameCommand.getGameID(), new GameData(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), gameData.game()));
 
         broadcastExcept(gameCommand.getGameID(), null, new NotificationServerMessage(username + " resigned. Game over!"));
     }
 
     private void broadcastExcept(int gameID, WsContext except, ServerMessage message) {
-        GameSession session = sessions.get(gameID);
+        GameSession session = getSession(gameID);
         Gson gson = new Gson();
 
         String exceptId = except == null ? null : except.sessionId();
@@ -341,6 +352,10 @@ public class Server {
                 safeSend(obs, gson.toJson(message));
             }
         }
+    }
+
+    private GameSession getSession(int gameID) {
+        return sessions.computeIfAbsent(gameID, id -> new GameSession());
     }
 
     private void handleDisconnect(WsContext ctx) {
