@@ -15,6 +15,7 @@ import com.google.gson.GsonBuilder;
 
 import chess.ChessGame;
 import io.javalin.json.JsonMapper;
+import io.javalin.websocket.WsContext;
 import io.javalin.websocket.WsMessageContext;
 
 import org.jetbrains.annotations.NotNull;
@@ -81,7 +82,8 @@ public class Server {
         javalin.ws("/ws", ws -> {
             ws.onConnect(ctx -> System.out.println("Connected"));
             ws.onMessage(this::onMessage);
-            ws.onClose(ctx -> System.out.println("Closed"));
+            ws.onClose(ctx -> handleDisconnect(ctx));
+            ws.onError(ctx -> handleDisconnect(ctx));
         });
     }
 
@@ -213,19 +215,19 @@ public class Server {
         Gson gson = new Gson();
 
         if(gameData == null){
-            ctx.send(gson.toJson(new ErrorServerMessage("Error: invalid gameID")));
+            safeSend(ctx, gson.toJson(new ErrorServerMessage("Error: invalid gameID")));
             return;
         }
 
         if(authDAO.getAuth(gameCommand.getAuthToken()) == null){
-            ctx.send(gson.toJson(new ErrorServerMessage("Error: bad auth")));
+            safeSend(ctx, gson.toJson(new ErrorServerMessage("Error: bad auth")));
             return;
         }
 
         String currentUsername = authDAO.getAuth(gameCommand.getAuthToken()).username();
 
         if(currentUsername == null){
-            ctx.send(gson.toJson(new ErrorServerMessage("Error: unauthorized")));
+            safeSend(ctx, gson.toJson(new ErrorServerMessage("Error: unauthorized")));
             return;
         }
 
@@ -237,7 +239,7 @@ public class Server {
             session.addObservers(ctx);
         }
 
-        ctx.send(gson.toJson(new LoadServerMessage(gameData.game())));
+        safeSend(ctx, gson.toJson(new LoadServerMessage(gameData.game())));
 
         NotificationServerMessage notificationServerMessage = new NotificationServerMessage(currentUsername + " joined the game!");
         broadcastExcept(gameCommand.getGameID(), ctx, notificationServerMessage);
@@ -252,14 +254,14 @@ public class Server {
         ChessGame.TeamColor color = gameData.whiteUsername().equals(username) ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
         
         if(gameData.game().getTeamTurn() != color){
-            ctx.send(gson.toJson(new ErrorServerMessage("Error: not your turn")));
+            safeSend(ctx, gson.toJson(new ErrorServerMessage("Error: not your turn")));
             return;
         }
 
         try{
             gameData.game().makeMove(gameCommand.getMove());
         } catch(Exception e){
-            ctx.send(gson.toJson(new ErrorServerMessage("Error: invalid move")));
+            safeSend(ctx, gson.toJson(new ErrorServerMessage("Error: invalid move")));
             return;
         }
 
@@ -297,7 +299,7 @@ public class Server {
         GameData gameData = gameDAO.getGame(gameCommand.getGameID());
 
         if(gameData.game().getIsOver() == true){
-            ctx.send(gson.toJson(new ErrorServerMessage("Error: game already over")));
+            safeSend(ctx, gson.toJson(new ErrorServerMessage("Error: game already over")));
             return;
         }
 
@@ -311,16 +313,34 @@ public class Server {
         GameSession session = sessions.get(gameID);
         Gson gson = new Gson();
         if(session.getWhite() != null && session.getWhite() != except){
-            session.getWhite().send(gson.toJson(message));
+            safeSend(session.getWhite(), gson.toJson(message));
         }
         if(session.getBlack() != null && session.getBlack() != except){
-            session.getBlack().send(gson.toJson(message));
+            safeSend(session.getBlack(), gson.toJson(message));
         }
 
         for(WsMessageContext ctx : session.getObservers()){
             if(ctx != except){
-                ctx.send(gson.toJson(message));
+                safeSend(ctx, gson.toJson(message));
             }
+        }
+    }
+
+    private void handleDisconnect(WsContext ctx) {
+        for (GameSession session : sessions.values()) {
+            session.removeIfPresent(ctx);
+        }
+    }
+
+    private void safeSend(WsContext ctx, String msg) {
+        if (ctx == null){
+            return;
+        }
+
+        try {
+            ctx.send(msg);
+        } catch (Exception e) {
+            handleDisconnect(ctx);
         }
     }
 

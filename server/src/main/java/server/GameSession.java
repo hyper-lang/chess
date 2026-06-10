@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import chess.ChessGame;
+import io.javalin.websocket.WsContext;
 import io.javalin.websocket.WsMessageContext;
 
 public class GameSession {
@@ -50,5 +51,15 @@ public class GameSession {
 
     public Collection<WsMessageContext> getObservers(){
         return observers;
+    }
+
+    public void removeIfPresent(WsContext ctx) {
+        if (white == ctx){
+            white = null;
+        }
+        if (black == ctx){
+            black = null;
+        }
+        observers.remove(ctx);
     }
 }
