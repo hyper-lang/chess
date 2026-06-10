@@ -324,6 +324,7 @@ public class Server {
 
     private void resign(WsMessageContext ctx, UserGameCommand gameCommand) throws Exception {
         Gson gson = new Gson();
+
         AuthData auth = authDAO.getAuth(gameCommand.getAuthToken());
         if(auth == null) {
             safeSend(ctx, gson.toJson(new ErrorServerMessage("Error: invalid auth")));
@@ -340,6 +341,14 @@ public class Server {
 
         if(gameData.game().getIsOver() == true){
             safeSend(ctx, gson.toJson(new ErrorServerMessage("Error: game already over")));
+            return;
+        }
+
+        boolean isWhite = username.equals(gameData.whiteUsername());
+        boolean isBlack = username.equals(gameData.blackUsername());
+
+        if (!isWhite && !isBlack) {
+            safeSend(ctx, gson.toJson(new ErrorServerMessage("Error: observers cannot resign")));
             return;
         }
 
