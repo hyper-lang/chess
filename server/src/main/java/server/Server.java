@@ -266,6 +266,11 @@ public class Server {
         //Technically an observer could craft makeMove socket commands, change the line below to prevent that
         ChessGame.TeamColor color = gameData.whiteUsername().equals(username) ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
         
+        if (gameData.game().getIsOver()) {
+            safeSend(ctx, gson.toJson(new ErrorServerMessage("Error: game is over")));
+            return;
+        }
+
         if(gameData.game().getTeamTurn() != color){
             safeSend(ctx, gson.toJson(new ErrorServerMessage("Error: not your turn")));
             return;
