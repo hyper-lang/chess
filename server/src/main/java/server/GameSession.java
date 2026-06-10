@@ -5,13 +5,12 @@ import java.util.Collection;
 
 import chess.ChessGame;
 import io.javalin.websocket.WsContext;
-import io.javalin.websocket.WsMessageContext;
 
 public class GameSession {
     private ChessGame game;
-    private WsMessageContext white;
-    private WsMessageContext black;
-    private Collection<WsMessageContext> observers;
+    private WsContext white;
+    private WsContext black;
+    private Collection<WsContext> observers;
 
     public GameSession(){
         observers = new ArrayList<>();
@@ -21,19 +20,19 @@ public class GameSession {
         this.game = game;
     }
 
-    public void setWhite(WsMessageContext ctx){
+    public void setWhite(WsContext ctx){
         white = ctx;
     }
 
-    public void setBlack(WsMessageContext ctx){
+    public void setBlack(WsContext ctx){
         black = ctx;
     }
 
-    public void addObservers(WsMessageContext ctx){
+    public void addObservers(WsContext ctx){
         observers.add(ctx);
     }
 
-    public void removeObserver(WsMessageContext ctx){
+    public void removeObserver(WsContext ctx){
         observers.remove(ctx);
     }
 
@@ -41,15 +40,15 @@ public class GameSession {
         return game;
     }
 
-    public WsMessageContext getWhite(){
+    public WsContext getWhite(){
         return white;
     }
 
-    public WsMessageContext getBlack(){
+    public WsContext getBlack(){
         return black;
     }
 
-    public Collection<WsMessageContext> getObservers(){
+    public Collection<WsContext> getObservers(){
         return observers;
     }
 

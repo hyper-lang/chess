@@ -322,19 +322,23 @@ public class Server {
         broadcastExcept(gameCommand.getGameID(), null, new NotificationServerMessage(username + " resigned. Game over!"));
     }
 
-    private void broadcastExcept(int gameID, WsMessageContext except, ServerMessage message){
+    private void broadcastExcept(int gameID, WsContext except, ServerMessage message) {
         GameSession session = sessions.get(gameID);
         Gson gson = new Gson();
-        if(session.getWhite() != null && session.getWhite() != except){
+
+        String exceptId = except == null ? null : except.sessionId();
+
+        if (session.getWhite() != null && !session.getWhite().sessionId().equals(exceptId)) {
             safeSend(session.getWhite(), gson.toJson(message));
         }
-        if(session.getBlack() != null && session.getBlack() != except){
+
+        if (session.getBlack() != null && !session.getBlack().sessionId().equals(exceptId)) {
             safeSend(session.getBlack(), gson.toJson(message));
         }
 
-        for(WsMessageContext ctx : session.getObservers()){
-            if(ctx != except){
-                safeSend(ctx, gson.toJson(message));
+        for (WsContext obs : session.getObservers()) {
+            if (!obs.sessionId().equals(exceptId)) {
+                safeSend(obs, gson.toJson(message));
             }
         }
     }
