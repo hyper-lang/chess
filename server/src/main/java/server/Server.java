@@ -202,16 +202,27 @@ public class Server {
                 MoveUserGameCommand moveGameCommand = wsGson.fromJson(ctx.message(), MoveUserGameCommand.class);
                 makeMove(ctx, moveGameCommand);
             }
-            case LEAVE -> leave();
-            case RESIGN -> resign();
+            case LEAVE -> leave(ctx, gameCommand);
+            case RESIGN -> resign(ctx, gameCommand);
         }
     }
 
     private void connect(WsMessageContext ctx, UserGameCommand gameCommand) throws Exception {
         GameSession session = sessions.computeIfAbsent(gameCommand.getGameID(), id -> new GameSession());
         GameData gameData = gameDAO.getGame(gameCommand.getGameID());
-        String currentUsername = authDAO.getAuth(gameCommand.getAuthToken()).username();
         Gson gson = new Gson();
+
+        if(gameData == null){
+            ctx.send(gson.toJson(new ErrorServerMessage("Error: invalid gameID")));
+            return;
+        }
+
+        if(authDAO.getAuth(gameCommand.getAuthToken()) == null){
+            ctx.send(gson.toJson(new ErrorServerMessage("Error: bad auth")));
+            return;
+        }
+
+        String currentUsername = authDAO.getAuth(gameCommand.getAuthToken()).username();
 
         if(currentUsername == null){
             ctx.send(gson.toJson(new ErrorServerMessage("Error: unauthorized")));
@@ -226,6 +237,8 @@ public class Server {
             session.addObservers(ctx);
         }
 
+        ctx.send(gson.toJson(new LoadServerMessage(gameData.game())));
+
         NotificationServerMessage notificationServerMessage = new NotificationServerMessage(currentUsername + " joined the game!");
         broadcastExcept(gameCommand.getGameID(), ctx, notificationServerMessage);
     }
@@ -235,6 +248,7 @@ public class Server {
         String username = authDAO.getAuth(gameCommand.getAuthToken()).username();
         GameSession session = sessions.get(gameCommand.getGameID());
         GameData gameData = gameDAO.getGame(gameCommand.getGameID());
+        //Technically an observer could craft makeMove socket commands, change the line below to prevent that
         ChessGame.TeamColor color = gameData.whiteUsername().equals(username) ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
         
         if(gameData.game().getTeamTurn() != color){
@@ -251,6 +265,7 @@ public class Server {
 
         GameData updated = new GameData(gameData.gameID(), gameData.whiteUsername(),
                                         gameData.blackUsername(), gameData.gameName(), gameData.game());
+        session.setGame(updated.game());
 
         gameDAO.updateGame(gameCommand.getGameID(), updated);
 
@@ -259,9 +274,38 @@ public class Server {
         //check for check, checkmate, and stalemate still needs implementation
     }
 
-    private void leave(){}
+    private void leave(WsMessageContext ctx, UserGameCommand gameCommand) throws Exception {
+        GameSession gameSession = sessions.get(gameCommand.getGameID());
+        String username = authDAO.getAuth(gameCommand.getAuthToken()).username();
+        GameData gameData = gameDAO.getGame(gameCommand.getGameID());
 
-    private void resign(){}
+        if(gameData.whiteUsername().equals(username)){
+            gameSession.setWhite(null);
+        } else if(gameData.blackUsername().equals(username)){
+            gameSession.setBlack(null);
+        } else{
+            gameSession.removeObserver(ctx);
+        }
+
+        broadcastExcept(gameCommand.getGameID(), ctx, new NotificationServerMessage(username + " left the game."));
+    }
+
+    private void resign(WsMessageContext ctx, UserGameCommand gameCommand) throws Exception {
+        Gson gson = new Gson();
+        GameSession session = sessions.get(gameCommand.getGameID());
+        String username = authDAO.getAuth(gameCommand.getAuthToken()).username();
+        GameData gameData = gameDAO.getGame(gameCommand.getGameID());
+
+        if(gameData.game().getIsOver() == true){
+            ctx.send(gson.toJson(new ErrorServerMessage("Error: game already over")));
+            return;
+        }
+
+        session.getGame().setIsOver(true);
+        gameDAO.updateGame(gameCommand.getGameID(), new GameData(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), session.getGame()));
+
+        broadcastExcept(gameCommand.getGameID(), null, new NotificationServerMessage(username + " resigned. Game over!"));
+    }
 
     private void broadcastExcept(int gameID, WsMessageContext except, ServerMessage message){
         GameSession session = sessions.get(gameID);

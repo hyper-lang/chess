@@ -12,6 +12,7 @@ import java.util.Collection;
 public class ChessGame {
     ChessBoard board;
     TeamColor turn;
+    boolean isOver;
 
     public ChessGame() {
         board = new ChessBoard();
@@ -228,6 +229,14 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return board;
+    }
+
+    public boolean getIsOver(){
+        return isOver;
+    }
+
+    public void setIsOver(boolean over){
+        isOver = over;
     }
 
     @Override

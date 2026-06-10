@@ -32,6 +32,10 @@ public class GameSession {
         observers.add(ctx);
     }
 
+    public void removeObserver(WsMessageContext ctx){
+        observers.remove(ctx);
+    }
+
     public ChessGame getGame(){
         return game;
     }
