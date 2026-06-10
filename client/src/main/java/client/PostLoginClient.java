@@ -2,7 +2,6 @@ package client;
 
 import model.AuthData;
 import model.GameData;
-import websocket.commands.UserGameCommand;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -95,7 +94,6 @@ public class PostLoginClient {
             if(gameList.get(listID) == null){
                 throw new Exception("Game doesn't exist!");
             }
-            PrintBoard.printBoard(gameList.get(listID).game().getBoard(), true);
         } else if(words[0].toLowerCase().equals("logout")){
             server.logout(auth);
             return null;

@@ -1,5 +1,6 @@
 package client;
 
+import jakarta.websocket.ClientEndpoint;
 import jakarta.websocket.ContainerProvider;
 import jakarta.websocket.Endpoint;
 import jakarta.websocket.EndpointConfig;
@@ -8,16 +9,13 @@ import jakarta.websocket.Session;
 import jakarta.websocket.WebSocketContainer;
 
 import websocket.commands.*;
-import websocket.messages.ServerMessage;
-
-import static websocket.messages.ServerMessage.ServerMessageType.ERROR;
-import static websocket.messages.ServerMessage.ServerMessageType.NOTIFICATION;
+import websocket.messages.*;
 
 import java.net.URI;
 
 import com.google.gson.Gson;
 
-public class GameplayClient {
+public class GameplayClient extends Endpoint {
     public Session session;
 
     public GameplayClient(String url) throws Exception {
@@ -29,7 +27,7 @@ public class GameplayClient {
             public void onMessage(String rawMessage) {
                 Gson gson = new Gson();
                 ServerMessage serverMessage = gson.fromJson(rawMessage, ServerMessage.class);
-                System.out.println(serverMessage.getServerMessageType());
+                message(serverMessage, rawMessage);
             }
         });
     }
@@ -41,11 +39,33 @@ public class GameplayClient {
 
     public void onOpen(Session session, EndpointConfig endpointConfig){}
 
-    public void message(ServerMessage serverMessage){
+    public void message(ServerMessage serverMessage, String rawMessage){
+        Gson gson = new Gson();
         switch(serverMessage.getServerMessageType()){
-            case LOAD_GAME -> ;
-            case ERROR -> ;
-            case NOTIFICATION -> ;
+            case LOAD_GAME:
+                LoadServerMessage loadServerMessage = gson.fromJson(rawMessage, LoadServerMessage.class);
+                loadGame(loadServerMessage);
+                break;
+            case ERROR:
+                ErrorServerMessage errorServerMessage = gson.fromJson(rawMessage, ErrorServerMessage.class);
+                error(errorServerMessage);
+                break;
+            case NOTIFICATION:
+                NotificationServerMessage notificationServerMessage = gson.fromJson(rawMessage, NotificationServerMessage.class);
+                notification(notificationServerMessage);
+                break;
         }
+    }
+
+    public void loadGame(LoadServerMessage serverMessage){
+        PrintBoard.printBoard(serverMessage.getGame().getBoard(), false);
+    }
+
+    public void error(ErrorServerMessage serverMessage){
+        System.out.println("Error! " + serverMessage.getMessage());
+    }
+
+    public void notification(NotificationServerMessage serverMessage){
+        System.out.println(serverMessage.getMessage());
     }
 }

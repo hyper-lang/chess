@@ -8,6 +8,7 @@ import io.javalin.http.Context;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -17,8 +18,8 @@ import io.javalin.websocket.WsMessageContext;
 
 import org.jetbrains.annotations.NotNull;
 
-import websocket.commands.UserGameCommand;
-import websocket.messages.ServerMessage;
+import websocket.commands.*;
+import websocket.messages.*;
 
 public class Server {
 
@@ -30,6 +31,8 @@ public class Server {
     private UserDAO userDAO;
     private AuthDAO authDAO;
     private GameDAO gameDAO;
+
+    private Map<Integer, GameSession> sessions;
 
     public Server() {
         try{
@@ -43,6 +46,8 @@ public class Server {
         userService = new UserService(userDAO, authDAO);
         gameService = new GameService(authDAO, gameDAO);
         clearService = new ClearService(userDAO, authDAO, gameDAO);
+
+        sessions = new HashMap<>();
 
         Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
         JsonMapper gsonMapper = new JsonMapper() {
@@ -186,14 +191,54 @@ public class Server {
         ctx.json(Map.of("message", "Error: " + msg));
     }
 
-    private void onMessage(WsMessageContext ctx){
+    private void onMessage(WsMessageContext ctx) throws Exception {
         Gson wsGson = new Gson();
         UserGameCommand gameCommand = wsGson.fromJson(ctx.message(), UserGameCommand.class);
         switch(gameCommand.getCommandType()){
-            case CONNECT -> connect();
-            case MAKE_MOVE -> make_move();
+            case CONNECT -> connect(ctx, gameCommand);
+            case MAKE_MOVE -> makeMove();
             case LEAVE -> leave();
             case RESIGN -> resign();
+        }
+    }
+
+    private void connect(WsMessageContext ctx, UserGameCommand gameCommand) throws Exception {
+        GameSession session = sessions.computeIfAbsent(gameCommand.getGameID(), id -> new GameSession());
+        GameData gameData = gameDAO.getGame(gameCommand.getGameID());
+        String currentUsername = authDAO.getAuth(gameCommand.getAuthToken()).username();
+
+        if(gameData.whiteUsername() != null && gameData.whiteUsername().equals(currentUsername)){
+            session.setWhite(ctx);
+        }else if(gameData.blackUsername() != null && gameData.blackUsername().equals(currentUsername)){
+            session.setBlack(ctx);
+        }else{
+            session.addObservers(ctx);
+        }
+
+        NotificationServerMessage notificationServerMessage = new NotificationServerMessage(currentUsername + " joined the game!");
+        broadcastExcept(gameCommand.getGameID(), ctx, notificationServerMessage);
+    }
+
+    private void makeMove(){}
+
+    private void leave(){}
+
+    private void resign(){}
+
+    private void broadcastExcept(int gameID, WsMessageContext except, ServerMessage message){
+        GameSession session = sessions.get(gameID);
+        Gson gson = new Gson();
+        if(session.getWhite() != null && session.getWhite() != except){
+            session.getWhite().send(gson.toJson(message));
+        }
+        if(session.getBlack() != null && session.getBlack() != except){
+            session.getBlack().send(gson.toJson(message));
+        }
+
+        for(WsMessageContext ctx : session.getObservers()){
+            if(ctx != except){
+                ctx.send(gson.toJson(message));
+            }
         }
     }
 

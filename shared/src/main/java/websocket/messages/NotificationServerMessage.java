@@ -3,8 +3,8 @@ package websocket.messages;
 public class NotificationServerMessage extends ServerMessage {
     private String message;
 
-    public NotificationServerMessage(ServerMEssageType type, String message){
-        super(type);
+    public NotificationServerMessage(String message){
+        super(ServerMessageType.NOTIFICATION);
         this.message = message;
     }
 
