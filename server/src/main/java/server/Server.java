@@ -14,6 +14,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import io.javalin.json.JsonMapper;
 import io.javalin.websocket.WsContext;
 import io.javalin.websocket.WsMessageContext;
@@ -225,6 +226,7 @@ public class Server {
         }
 
         String currentUsername = authDAO.getAuth(gameCommand.getAuthToken()).username();
+        String role;
 
         if(currentUsername == null){
             safeSend(ctx, gson.toJson(new ErrorServerMessage("Error: unauthorized")));
@@ -233,21 +235,31 @@ public class Server {
 
         if(gameData.whiteUsername() != null && gameData.whiteUsername().equals(currentUsername)){
             session.setWhite(ctx);
+            role = "white";
         }else if(gameData.blackUsername() != null && gameData.blackUsername().equals(currentUsername)){
             session.setBlack(ctx);
+            role = "black";
         }else{
             session.addObservers(ctx);
+            role = "an observer";
         }
 
         safeSend(ctx, gson.toJson(new LoadServerMessage(gameData.game())));
 
-        NotificationServerMessage notificationServerMessage = new NotificationServerMessage(currentUsername + " joined the game!");
+        NotificationServerMessage notificationServerMessage = new NotificationServerMessage(currentUsername + " joined as " + role + "!");
         broadcastExcept(gameCommand.getGameID(), ctx, notificationServerMessage);
     }
 
     private void makeMove(WsMessageContext ctx, MoveUserGameCommand gameCommand) throws Exception {
         Gson gson = new Gson();
-        String username = authDAO.getAuth(gameCommand.getAuthToken()).username();
+        AuthData auth = authDAO.getAuth(gameCommand.getAuthToken());
+
+        if(auth == null){
+            safeSend(ctx, gson.toJson(new ErrorServerMessage("Error: invalid auth")));
+            return;
+        }
+
+        String username = auth.username();
         GameSession session = sessions.get(gameCommand.getGameID());
         GameData gameData = gameDAO.getGame(gameCommand.getGameID());
         //Technically an observer could craft makeMove socket commands, change the line below to prevent that
@@ -272,6 +284,7 @@ public class Server {
         gameDAO.updateGame(gameCommand.getGameID(), updated);
 
         broadcastExcept(gameCommand.getGameID(), null, new LoadServerMessage(updated.game()));
+        broadcastExcept(gameCommand.getGameID(), ctx, new NotificationServerMessage(username + " moved " + updated.game().getBoard().getPiece(gameCommand.getMove().getEndPosition()).getPieceType().name()));
 
         //check for check, checkmate, and stalemate still needs implementation
     }
