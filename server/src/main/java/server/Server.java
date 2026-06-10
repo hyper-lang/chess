@@ -301,7 +301,6 @@ public class Server {
         broadcastExcept(gameCommand.getGameID(), null, new LoadServerMessage(gameData.game()));
 
         broadcastExcept(gameCommand.getGameID(), ctx, notification);
-        //check for check, checkmate, and stalemate still needs implementation
 
         if (gameData.game().isInCheckmate(TeamColor.BLACK) || gameData.game().isInCheckmate(TeamColor.WHITE)){
             gameData.game().setIsOver(true);
