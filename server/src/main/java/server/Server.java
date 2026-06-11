@@ -13,7 +13,6 @@ import java.util.Map;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import chess.ChessGame;
 import chess.ChessGame.TeamColor;
 import io.javalin.json.JsonMapper;
 import io.javalin.websocket.WsContext;
@@ -24,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import websocket.commands.*;
 import websocket.messages.*;
 
-public class Server {
+public class Server{
 
     private final Javalin javalin;
 
@@ -37,12 +36,12 @@ public class Server {
 
     private Map<Integer, GameSession> sessions;
 
-    public Server() {
+    public Server(){
         try{
             userDAO = new DatabaseUserDAO();
             authDAO = new DatabaseAuthDAO();
             gameDAO = new DatabaseGameDAO();
-        } catch(DataAccessException e){
+        }catch(DataAccessException e){
             throw new RuntimeException(e);
         }
 
@@ -53,21 +52,21 @@ public class Server {
         sessions = new HashMap<>();
 
         Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
-        JsonMapper gsonMapper = new JsonMapper() {
+        JsonMapper gsonMapper = new JsonMapper(){
             @NotNull
             @Override
-            public String toJsonString(@NotNull Object obj, @NotNull Type type) {
+            public String toJsonString(@NotNull Object obj, @NotNull Type type){
                 return gson.toJson(obj);
             }
 
             @NotNull
             @Override
-            public <T> T fromJsonString(@NotNull String json, @NotNull Type targetType) {
+            public <T> T fromJsonString(@NotNull String json, @NotNull Type targetType){
                 return gson.fromJson(json, targetType);
             }
         };
 
-        javalin = Javalin.create(config -> {
+        javalin = Javalin.create(config ->{
             config.staticFiles.add("web");
             config.jsonMapper(gsonMapper);
         });
@@ -80,7 +79,7 @@ public class Server {
         javalin.post("/game", this::createGame);
         javalin.put("/game", this::joinGame);
 
-        javalin.ws("/ws", ws -> {
+        javalin.ws("/ws", ws ->{
             ws.onConnect(ctx -> System.out.println("Connected"));
             ws.onMessage(this::onMessage);
             ws.onClose(ctx -> handleDisconnect(ctx));
@@ -88,104 +87,104 @@ public class Server {
         });
     }
 
-    public int run(int desiredPort) {
+    public int run(int desiredPort){
         javalin.start(desiredPort);
         return javalin.port();
     }
 
-    public void stop() {
+    public void stop(){
         javalin.stop();
     }
 
-    public void register(Context ctx) {
-        try {
+    public void register(Context ctx){
+        try{
             UserRequest req = ctx.bodyAsClass(UserRequest.class);
             AuthData auth = userService.register(new UserData(req.username, req.password, req.email));
             ctx.status(200);
             ctx.json(auth);
-        } catch (DataAccessException e) {
+        }catch(DataAccessException e){
             handleError(e, ctx);
         }
     }
 
-    public void clear(Context ctx) {
-        try {
+    public void clear(Context ctx){
+        try{
             clearService.clear();
             ctx.status(200);
-        } catch (Exception e) {
+        }catch(Exception e){
             ctx.status(500);
             ctx.json(Map.of("message", "Error: " + e.getMessage()));
         }
     }
 
-    public void login(Context ctx) {
-        try {
+    public void login(Context ctx){
+        try{
             UserData user = ctx.bodyAsClass(UserData.class);
             AuthData auth = userService.login(user);
             ctx.status(200);
             ctx.json(auth);
-        } catch (DataAccessException e) {
+        }catch(DataAccessException e){
             handleError(e, ctx);
-        } catch (Exception e) {
+        }catch(Exception e){
             ctx.status(400);
             ctx.json(Map.of("message", "Error: bad request"));
         }
     }
 
-    public void logout(Context ctx) {
-        try {
+    public void logout(Context ctx){
+        try{
             String authToken = ctx.header("authorization");
             userService.logout(authToken);
             ctx.status(200);
-        } catch (DataAccessException e) {
+        }catch(DataAccessException e){
             handleError(e, ctx);
         }
     }
 
-    public void listGames(Context ctx) {
-        try {
+    public void listGames(Context ctx){
+        try{
             String authToken = ctx.header("authorization");
             Collection<GameData> games = gameService.listGames(authToken);
             ctx.status(200);
             ctx.json(Map.of("games", games));
-        } catch (DataAccessException e) {
+        }catch(DataAccessException e){
             handleError(e, ctx);
         }
     }
 
-    public void createGame(Context ctx) {
-        try {
+    public void createGame(Context ctx){
+        try{
             String authToken = ctx.header("authorization");
             CreateGameRequest req = ctx.bodyAsClass(CreateGameRequest.class);
             int gameID = gameService.createGame(authToken, req.gameName);
             ctx.status(200);
             ctx.json(Map.of("gameID", gameID));
-        } catch (DataAccessException e) {
+        }catch(DataAccessException e){
             handleError(e, ctx);
         }
     }
 
-    public void joinGame(Context ctx) {
-        try {
+    public void joinGame(Context ctx){
+        try{
             String authToken = ctx.header("authorization");
             JoinGameRequest req = ctx.bodyAsClass(JoinGameRequest.class);
-            if (req.gameID == null) {
+            if(req.gameID == null){
                 throw new DataAccessException("bad request");
             }
             gameService.joinGame(authToken, req.gameID, req.playerColor);
             ctx.status(200);
             ctx.json(Map.of());
-        } catch (DataAccessException e) {
+        }catch(DataAccessException e){
             handleError(e, ctx);
-        } catch (Exception e) {
+        }catch(Exception e){
             ctx.status(400);
             ctx.json(Map.of("message", "Error: bad request"));
         }
     }
 
-    private void handleError(DataAccessException e, Context ctx) {
+    private void handleError(DataAccessException e, Context ctx){
         String msg = e.getMessage();
-        switch (msg) {
+        switch(msg){
             case "bad request" -> ctx.status(400);
             case "unauthorized" -> ctx.status(401);
             case "already taken" -> ctx.status(403);
@@ -195,25 +194,32 @@ public class Server {
         ctx.json(Map.of("message", "Error: " + msg));
     }
 
-    private void onMessage(WsMessageContext ctx) throws Exception {
-        Gson wsGson = new Gson();
-        UserGameCommand gameCommand = wsGson.fromJson(ctx.message(), UserGameCommand.class);
+    private void onMessage(WsMessageContext ctx) throws Exception{
+        try{
+            Gson wsGson = new Gson();
+            UserGameCommand gameCommand = wsGson.fromJson(ctx.message(), UserGameCommand.class);
 
-        switch(gameCommand.getCommandType()){
-            case CONNECT -> connect(ctx, gameCommand);
-            case MAKE_MOVE -> {
-                MoveUserGameCommand moveGameCommand = wsGson.fromJson(ctx.message(), MoveUserGameCommand.class);
-                makeMove(ctx, moveGameCommand);
+            switch(gameCommand.getCommandType()){
+                case CONNECT -> connect(ctx, gameCommand);
+                case MAKE_MOVE ->{
+                    MoveUserGameCommand moveGameCommand = wsGson.fromJson(ctx.message(), MoveUserGameCommand.class);
+                    makeMove(ctx, moveGameCommand);
+                }
+                case LEAVE -> leave(ctx, gameCommand);
+                case RESIGN -> resign(ctx, gameCommand);
             }
-            case LEAVE -> leave(ctx, gameCommand);
-            case RESIGN -> resign(ctx, gameCommand);
+        }catch(Exception e){
+            System.out.println("Exception in onMessage: " + e.getMessage());
+            e.printStackTrace();
+            Gson gson = new Gson();
+            safeSend(ctx, gson.toJson(new ErrorServerMessage("Error: " + e.getMessage())));
         }
     }
 
-    private void connect(WsMessageContext ctx, UserGameCommand gameCommand) throws Exception {
+    private void connect(WsMessageContext ctx, UserGameCommand gameCommand) throws Exception{
         GameSession session = sessions.computeIfAbsent(gameCommand.getGameID(), id -> new GameSession());
         GameData gameData = gameDAO.getGame(gameCommand.getGameID());
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
 
         if(gameData == null){
             safeSend(ctx, gson.toJson(new ErrorServerMessage("Error: invalid gameID")));
@@ -227,11 +233,6 @@ public class Server {
 
         String currentUsername = authDAO.getAuth(gameCommand.getAuthToken()).username();
         String role;
-
-        if(currentUsername == null){
-            safeSend(ctx, gson.toJson(new ErrorServerMessage("Error: unauthorized")));
-            return;
-        }
 
         session.removeIfPresent(ctx);
 
@@ -248,12 +249,13 @@ public class Server {
 
         safeSend(ctx, gson.toJson(new LoadServerMessage(gameData.game())));
 
-        NotificationServerMessage notificationServerMessage = new NotificationServerMessage(currentUsername + " joined as " + role + "!");
+        NotificationServerMessage notificationServerMessage = new NotificationServerMessage(
+                currentUsername + " joined as " + role + "!");
         broadcastExcept(gameCommand.getGameID(), ctx, notificationServerMessage);
     }
 
-    private void makeMove(WsMessageContext ctx, MoveUserGameCommand gameCommand) throws Exception {
-        Gson gson = new Gson();
+    private void makeMove(WsMessageContext ctx, MoveUserGameCommand gameCommand) throws Exception{
+        Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
         AuthData auth = authDAO.getAuth(gameCommand.getAuthToken());
 
         if(auth == null){
@@ -264,10 +266,20 @@ public class Server {
         String username = auth.username();
         GameSession session = getSession(gameCommand.getGameID());
         GameData gameData = gameDAO.getGame(gameCommand.getGameID());
-        //Technically an observer could craft makeMove socket commands, change the line below to prevent that
-        ChessGame.TeamColor color = gameData.whiteUsername().equals(username) ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
-        
-        if (gameData.game().getIsOver()) {
+
+        TeamColor color = null;
+        if(gameData.whiteUsername() != null && gameData.whiteUsername().equals(username)){
+            color = TeamColor.WHITE;
+        }else if(gameData.blackUsername() != null && gameData.blackUsername().equals(username)){
+            color = TeamColor.BLACK;
+        }
+
+        if(color == null){
+            safeSend(ctx, gson.toJson(new ErrorServerMessage("Error: you are not a player in this game")));
+            return;
+        }
+
+        if(gameData.game().getIsOver()){
             safeSend(ctx, gson.toJson(new ErrorServerMessage("Error: game is over")));
             return;
         }
@@ -278,48 +290,65 @@ public class Server {
         }
 
         try{
+            System.out.println("Processing move for " + username);
             gameData.game().makeMove(gameCommand.getMove());
-        } catch(Exception e){
+            System.out.println("Move successful.");
+        }catch(Exception e){
+            System.out.println("Move failed: " + e.getMessage());
+            e.printStackTrace();
             safeSend(ctx, gson.toJson(new ErrorServerMessage("Error: invalid move")));
             return;
         }
 
         GameData updated = new GameData(gameData.gameID(), gameData.whiteUsername(),
-                                        gameData.blackUsername(), gameData.gameName(), gameData.game());
+                gameData.blackUsername(), gameData.gameName(), gameData.game());
         session.setGame(updated.game());
 
         gameDAO.updateGame(gameCommand.getGameID(), updated);
 
         String pieceName = "piece";
         var endPiece = gameData.game().getBoard().getPiece(gameCommand.getMove().getEndPosition());
-        if(endPiece != null) {
+        if(endPiece != null){
             pieceName = endPiece.getPieceType().name();
         }
 
-        ServerMessage notification = new NotificationServerMessage(username + " moved " + pieceName);
+        ServerMessage notification = new NotificationServerMessage(username + " moved " + pieceName + " from "
+                + gameCommand.getMove().getStartPosition() + " to " + gameCommand.getMove().getEndPosition());
 
         broadcastExcept(gameCommand.getGameID(), null, new LoadServerMessage(gameData.game()));
 
         broadcastExcept(gameCommand.getGameID(), ctx, notification);
 
-        if (gameData.game().isInCheckmate(TeamColor.BLACK) || gameData.game().isInCheckmate(TeamColor.WHITE)){
+        if(gameData.game().isInCheckmate(TeamColor.BLACK)){
             gameData.game().setIsOver(true);
-            broadcastExcept(gameCommand.getGameID(), null, new NotificationServerMessage("Checkmate!"));
+            broadcastExcept(gameCommand.getGameID(), null,
+                    new NotificationServerMessage(gameData.blackUsername() + " is in checkmate!"));
+            return;
+        }
+        if(gameData.game().isInCheckmate(TeamColor.WHITE)){
+            gameData.game().setIsOver(true);
+            broadcastExcept(gameCommand.getGameID(), null,
+                    new NotificationServerMessage(gameData.whiteUsername() + " is in checkmate!"));
             return;
         }
 
-        if (gameData.game().isInStalemate(TeamColor.WHITE) || gameData.game().isInStalemate(TeamColor.BLACK)){
+        if(gameData.game().isInStalemate(TeamColor.WHITE) || gameData.game().isInStalemate(TeamColor.BLACK)){
             gameData.game().setIsOver(true);
             broadcastExcept(gameCommand.getGameID(), null, new NotificationServerMessage("Stalemate!"));
             return;
         }
 
-        if(gameData.game().isInCheck(TeamColor.WHITE) || gameData.game().isInCheck(TeamColor.BLACK)){
-                broadcastExcept(gameCommand.getGameID(), null, new NotificationServerMessage("Check!"));
+        if(gameData.game().isInCheck(TeamColor.WHITE)){
+            broadcastExcept(gameCommand.getGameID(), null,
+                    new NotificationServerMessage(gameData.whiteUsername() + " is in check!"));
+        }
+        if(gameData.game().isInCheck(TeamColor.BLACK)){
+            broadcastExcept(gameCommand.getGameID(), null,
+                    new NotificationServerMessage(gameData.blackUsername() + " is in check!"));
         }
     }
 
-    private void leave(WsMessageContext ctx, UserGameCommand gameCommand) throws Exception {
+    private void leave(WsMessageContext ctx, UserGameCommand gameCommand) throws Exception{
         GameSession gameSession = getSession(gameCommand.getGameID());
         String username = authDAO.getAuth(gameCommand.getAuthToken()).username();
         GameData gameData = gameDAO.getGame(gameCommand.getGameID());
@@ -327,15 +356,13 @@ public class Server {
         String newWhite = gameData.whiteUsername();
         String newBlack = gameData.blackUsername();
 
-        if(username.equals(gameData.whiteUsername())) {
+        if(username.equals(gameData.whiteUsername())){
             gameSession.setWhite(null);
             newWhite = null;
-        } 
-        else if(username.equals(gameData.blackUsername())) {
+        }else if(username.equals(gameData.blackUsername())){
             gameSession.setBlack(null);
             newBlack = null;
-        } 
-        else{
+        }else{
             gameSession.removeObserver(ctx);
         }
 
@@ -346,11 +373,11 @@ public class Server {
         broadcastExcept(gameCommand.getGameID(), ctx, new NotificationServerMessage(username + " left the game."));
     }
 
-    private void resign(WsMessageContext ctx, UserGameCommand gameCommand) throws Exception {
-        Gson gson = new Gson();
+    private void resign(WsMessageContext ctx, UserGameCommand gameCommand) throws Exception{
+        Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
 
         AuthData auth = authDAO.getAuth(gameCommand.getAuthToken());
-        if(auth == null) {
+        if(auth == null){
             safeSend(ctx, gson.toJson(new ErrorServerMessage("Error: invalid auth")));
             return;
         }
@@ -358,7 +385,7 @@ public class Server {
         String username = auth.username();
         GameData gameData = gameDAO.getGame(gameCommand.getGameID());
 
-        if(gameData == null) {
+        if(gameData == null){
             safeSend(ctx, gson.toJson(new ErrorServerMessage("Error: invalid gameID")));
             return;
         }
@@ -371,71 +398,74 @@ public class Server {
         boolean isWhite = username.equals(gameData.whiteUsername());
         boolean isBlack = username.equals(gameData.blackUsername());
 
-        if (!isWhite && !isBlack) {
+        if(!isWhite && !isBlack){
             safeSend(ctx, gson.toJson(new ErrorServerMessage("Error: observers cannot resign")));
             return;
         }
 
         gameData.game().setIsOver(true);
-        gameDAO.updateGame(gameCommand.getGameID(), new GameData(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), gameData.game()));
+        gameDAO.updateGame(gameCommand.getGameID(), new GameData(gameData.gameID(), gameData.whiteUsername(),
+                gameData.blackUsername(), gameData.gameName(), gameData.game()));
 
-        broadcastExcept(gameCommand.getGameID(), null, new NotificationServerMessage(username + " resigned. Game over!"));
+        broadcastExcept(gameCommand.getGameID(), null,
+                new NotificationServerMessage(username + " resigned. Game over!"));
     }
 
-    private void broadcastExcept(int gameID, WsContext except, ServerMessage message) {
+    private void broadcastExcept(int gameID, WsContext except, ServerMessage message){
         GameSession session = getSession(gameID);
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
+        String exceptSessionId = (except != null) ? except.sessionId() : null;
 
-        String exceptId = except == null ? null : except.sessionId();
-
-        if (session.getWhite() != null && !session.getWhite().sessionId().equals(exceptId)) {
+        if(session.getWhite() != null
+                && (exceptSessionId == null || !session.getWhite().sessionId().equals(exceptSessionId))){
             safeSend(session.getWhite(), gson.toJson(message));
         }
 
-        if (session.getBlack() != null && !session.getBlack().sessionId().equals(exceptId)) {
+        if(session.getBlack() != null
+                && (exceptSessionId == null || !session.getBlack().sessionId().equals(exceptSessionId))){
             safeSend(session.getBlack(), gson.toJson(message));
         }
 
-        for (WsContext obs : session.getObservers()) {
-            if (!obs.sessionId().equals(exceptId)) {
+        for(WsContext obs : session.getObservers()){
+            if(exceptSessionId == null || !obs.sessionId().equals(exceptSessionId)){
                 safeSend(obs, gson.toJson(message));
             }
         }
     }
 
-    private GameSession getSession(int gameID) {
+    private GameSession getSession(int gameID){
         return sessions.computeIfAbsent(gameID, id -> new GameSession());
     }
 
-    private void handleDisconnect(WsContext ctx) {
-        for (GameSession session : sessions.values()) {
+    private void handleDisconnect(WsContext ctx){
+        for(GameSession session : sessions.values()){
             session.removeIfPresent(ctx);
         }
     }
 
-    private void safeSend(WsContext ctx, String msg) {
-        if (ctx == null){
+    private void safeSend(WsContext ctx, String msg){
+        if(ctx == null){
             return;
         }
 
-        try {
+        try{
             ctx.send(msg);
-        } catch (Exception e) {
+        }catch(Exception e){
             handleDisconnect(ctx);
         }
     }
 
-    public static class UserRequest {
+    public static class UserRequest{
         public String username;
         public String password;
         public String email;
     }
 
-    public static class CreateGameRequest {
+    public static class CreateGameRequest{
         public String gameName;
     }
 
-    public static class JoinGameRequest {
+    public static class JoinGameRequest{
         public Integer gameID;
         public String playerColor;
     }

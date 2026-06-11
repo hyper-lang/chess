@@ -3,7 +3,7 @@ package client;
 import model.AuthData;
 import model.UserData;
 
-public class PreLoginClient {
+public class PreLoginClient{
     private ServerFacade server;
     private String help;
     
@@ -17,7 +17,7 @@ public class PreLoginClient {
                 """;
     }
 
-    public AuthData preLoginInput(String input) throws Exception {
+    public AuthData preLoginInput(String input) throws Exception{
         String[] words = input.split("\\s+");
         UserData user;
         AuthData auth;
@@ -30,11 +30,11 @@ public class PreLoginClient {
             auth = server.register(user);
             if(auth.authToken() != null){
                 System.out.println("Registered!");
-            } else{
+            }else{
                 throw new Exception("Registration error!");
             }
             return auth;
-        } else if(words[0].toLowerCase().equals("login")){
+        }else if(words[0].toLowerCase().equals("login")){
             if(words.length != 3){
                 throw new Exception("Incorrect amount of arguments!");
             }
@@ -42,11 +42,11 @@ public class PreLoginClient {
             auth = server.login(user);
             if(auth.authToken() != null){
                 System.out.println("Logged in as " + auth.username());
-            } else{
+            }else{
                 throw new Exception("Authentication error!");
             }
             return auth;
-        } else if(words[0].toLowerCase().equals("help")){
+        }else if(words[0].toLowerCase().equals("help")){
             System.out.println(help);
             return null;
         }

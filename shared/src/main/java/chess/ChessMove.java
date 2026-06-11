@@ -13,7 +13,7 @@ public class ChessMove {
     private ChessPiece.PieceType promotionPiece;
 
     public ChessMove(ChessPosition startPosition, ChessPosition endPosition,
-                     ChessPiece.PieceType promotionPiece) {
+                     ChessPiece.PieceType promotionPiece){
         this.startPosition = startPosition;
         this.endPosition = endPosition;
         this.promotionPiece = promotionPiece;
@@ -22,14 +22,14 @@ public class ChessMove {
     /**
      * @return ChessPosition of starting location
      */
-    public ChessPosition getStartPosition() {
+    public ChessPosition getStartPosition(){
         return startPosition;
     }
 
     /**
      * @return ChessPosition of ending location
      */
-    public ChessPosition getEndPosition() {
+    public ChessPosition getEndPosition(){
         return endPosition;
     }
 
@@ -39,12 +39,12 @@ public class ChessMove {
      *
      * @return Type of piece to promote a pawn to, or null if no promotion
      */
-    public ChessPiece.PieceType getPromotionPiece() {
+    public ChessPiece.PieceType getPromotionPiece(){
         return promotionPiece;
     }
 
     @Override
-    public int hashCode() {
+    public int hashCode(){
         final int prime = 31;
         int result = 1;
         result = prime * result + ((startPosition == null) ? 0 : startPosition.hashCode());
@@ -54,32 +54,32 @@ public class ChessMove {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj){
+    public boolean equals(Object obj){
+        if(this == obj){
             return true;
         }
-        if (obj == null){
+        if(obj == null){
             return false;
         }
-        if (getClass() != obj.getClass()){
+        if(getClass() != obj.getClass()){
             return false;
         }
         ChessMove other = (ChessMove) obj;
-        if (startPosition == null) {
-            if (other.startPosition != null){
+        if(startPosition == null){
+            if(other.startPosition != null){
                 return false;
             }
-        } else if (!startPosition.equals(other.startPosition)){
+        }else if(!startPosition.equals(other.startPosition)){
             return false;
         }
-        if (endPosition == null) {
-            if (other.endPosition != null){
+        if(endPosition == null){
+            if(other.endPosition != null){
                 return false;
             }
-        } else if (!endPosition.equals(other.endPosition)){
+        }else if(!endPosition.equals(other.endPosition)){
             return false;
         }
-        if (promotionPiece != other.promotionPiece){
+        if(promotionPiece != other.promotionPiece){
             return false;
         }
         return true;

@@ -16,7 +16,7 @@ public class ChessClient {
     private boolean running = true;
     private String url;
 
-    public ChessClient(String url) throws Exception {
+    public ChessClient(String url) throws Exception{
         server = new ServerFacade("http://" + url);
         preLoginClient = new PreLoginClient(server);
         this.url = url;
@@ -41,7 +41,7 @@ public class ChessClient {
                     if(auth == null){
                         loggedIn = false;
                     }
-                } else{
+                }else{
                     System.out.print("[LOGGED_OUT] >>> ");
                     input = scanner.nextLine();
 
@@ -58,7 +58,7 @@ public class ChessClient {
                         postLoginClient = new PostLoginClient(server, auth, url);
                     }
                 }
-            } catch(Exception e){
+            }catch(Exception e){
                 System.out.println(e.getMessage() + "\nPlease try again.");
             }
         }

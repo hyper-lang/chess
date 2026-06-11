@@ -2,18 +2,14 @@ package client;
 
 import model.AuthData;
 import model.GameData;
-import websocket.commands.UserGameCommand;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.google.gson.Gson;
-
 public class PostLoginClient {
     private ServerFacade server;
     private String url;
-    private GameplayClient gameplayClient;
     private AuthData auth;
     private String help;
     private Map<Integer, GameData> gameList;
@@ -35,7 +31,7 @@ public class PostLoginClient {
                 """;
     }
 
-    public AuthData postLoginInput(String input) throws Exception {
+    public AuthData postLoginInput(String input) throws Exception{
         String[] words = input.split("\\s+");
 
         if(words[0].toLowerCase().equals("create")){
@@ -44,7 +40,7 @@ public class PostLoginClient {
             }
             int gameID = server.createGame(auth, words[1]);
             System.out.println("Created game number " + gameID);
-        } else if(words[0].toLowerCase().equals("list")){
+        }else if(words[0].toLowerCase().equals("list")){
             if(words.length != 1){
                 throw new Exception("Incorrect amount of arguments!");
             }
@@ -61,7 +57,7 @@ public class PostLoginClient {
             if(games.size() == 0){
                 System.out.println("No games!");
             }
-        } else if(words[0].toLowerCase().equals("join")){
+        }else if(words[0].toLowerCase().equals("join")){
             if(words.length != 3){
                 throw new Exception("Incorrect amount of arguments!");
             }
@@ -81,15 +77,14 @@ public class PostLoginClient {
                 throw new Exception("Game doesn't exist!");
             }
             server.joinGame(auth, color, gameList.get(listID).gameID());
-            // boolean isWhite = color.equals("WHITE");
-            gameplayClient = new GameplayClient("ws://" + url + "/ws");
-            gameplayClient.send(new UserGameCommand(UserGameCommand.CommandType.CONNECT, auth.authToken(), gameList.get(listID).gameID()));
-        } else if(words[0].toLowerCase().equals("observe")){
+            GameplayUI gameplayUI = new GameplayUI(url, auth, gameList.get(listID).gameID(), color.equals("WHITE"));
+            gameplayUI.run();
+        }else if(words[0].toLowerCase().equals("observe")){
             if(words.length != 2){
                 throw new Exception("Incorrect amount of arguments!");
             }
             int listID = Integer.parseInt(words[1]);
-            int index =  1;
+            int index = 1;
             games = server.listGames(auth);
             gameList.clear();
             for(GameData i : games){
@@ -99,10 +94,12 @@ public class PostLoginClient {
             if(gameList.get(listID) == null){
                 throw new Exception("Game doesn't exist!");
             }
-        } else if(words[0].toLowerCase().equals("logout")){
+            GameplayUI gameplayUI = new GameplayUI(url, auth, gameList.get(listID).gameID(), true);
+            gameplayUI.run();
+        }else if(words[0].toLowerCase().equals("logout")){
             server.logout(auth);
             return null;
-        } else if(words[0].toLowerCase().equals("help")){
+        }else if(words[0].toLowerCase().equals("help")){
             System.out.println(help);
         }
         return auth;

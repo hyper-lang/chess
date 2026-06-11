@@ -12,7 +12,7 @@ import java.util.HashMap;
 public class ChessBoard {
     private Map<ChessPosition, ChessPiece> board = new HashMap<>();
 
-    public ChessBoard() {}
+    public ChessBoard(){}
 
     public ChessBoard(ChessBoard other){
         for(Map.Entry<ChessPosition, ChessPiece> i : other.board.entrySet()){
@@ -27,7 +27,7 @@ public class ChessBoard {
      * @param position where to add the piece to
      * @param piece    the piece to add
      */
-    public void addPiece(ChessPosition position, ChessPiece piece) {
+    public void addPiece(ChessPosition position, ChessPiece piece){
         board.put(position, piece);
     }
 
@@ -38,7 +38,7 @@ public class ChessBoard {
      * @return Either the piece at the position, or null if no piece is at that
      * position
      */
-    public ChessPiece getPiece(ChessPosition position) {
+    public ChessPiece getPiece(ChessPosition position){
         return board.get(position);
     }
 
@@ -60,7 +60,7 @@ public class ChessBoard {
      * Sets the board to the default starting board
      * (How the game of chess normally starts)
      */
-    public void resetBoard() {
+    public void resetBoard(){
         board = new HashMap<>();
         setRectangle(1, 1, ChessPiece.PieceType.ROOK);
         setRectangle(1, 2, ChessPiece.PieceType.KNIGHT);
@@ -98,7 +98,7 @@ public class ChessBoard {
         ChessPiece.PieceType promotionPiece = move.getPromotionPiece();
         if(promotionPiece == null){
             newPiece = new ChessPiece(getPiece(move.getStartPosition()));
-        } else{
+        }else{
             newPiece = new ChessPiece(getPiece(move.getStartPosition()).getTeamColor(), promotionPiece);
         }
 
@@ -107,7 +107,7 @@ public class ChessBoard {
     }
 
     @Override
-    public int hashCode() {
+    public int hashCode(){
         final int prime = 31;
         int result = 1;
         result = prime * result + ((board == null) ? 0 : board.hashCode());
@@ -115,22 +115,22 @@ public class ChessBoard {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj){
+    public boolean equals(Object obj){
+        if(this == obj){
             return true;
         }
-        if (obj == null){
+        if(obj == null){
             return false;
         }
-        if (getClass() != obj.getClass()){
+        if(getClass() != obj.getClass()){
             return false;
         }
         ChessBoard other = (ChessBoard) obj;
-        if (board == null) {
-            if (other.board != null){
+        if(board == null){
+            if(other.board != null){
                 return false;
             }
-        } else if (!board.equals(other.board)){
+        }else if(!board.equals(other.board)){
             return false;
         }
         return true;

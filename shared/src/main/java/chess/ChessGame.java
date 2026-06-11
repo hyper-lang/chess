@@ -14,7 +14,7 @@ public class ChessGame {
     TeamColor turn;
     boolean isOver;
 
-    public ChessGame() {
+    public ChessGame(){
         board = new ChessBoard();
         board.resetBoard();
         turn = TeamColor.WHITE;
@@ -23,7 +23,7 @@ public class ChessGame {
     /**
      * @return Which team's turn it is
      */
-    public TeamColor getTeamTurn() {
+    public TeamColor getTeamTurn(){
         return turn;
     }
 
@@ -32,14 +32,14 @@ public class ChessGame {
      *
      * @param team the team whose turn it is
      */
-    public void setTeamTurn(TeamColor team) {
+    public void setTeamTurn(TeamColor team){
         turn = team;
     }
 
     /**
      * Enum identifying the 2 possible teams in a chess game
      */
-    public enum TeamColor {
+    public enum TeamColor{
         WHITE,
         BLACK
     }
@@ -51,7 +51,7 @@ public class ChessGame {
      * @return Set of valid moves for requested piece, or null if no piece at
      * startPosition
      */
-    public Collection<ChessMove> validMoves(ChessPosition startPosition) {
+    public Collection<ChessMove> validMoves(ChessPosition startPosition){
         ChessPiece piece = board.getPiece(startPosition);
 
         if(piece == null){
@@ -75,7 +75,7 @@ public class ChessGame {
      * @param moveBoard
      * @return a collection of legal moves from the given board.
      */
-    public Collection<ChessMove> semivalidMoves(ChessPosition startPosition, ChessBoard moveBoard) {
+    public Collection<ChessMove> semivalidMoves(ChessPosition startPosition, ChessBoard moveBoard){
         ChessPiece piece;
         piece = moveBoard.getPiece(startPosition);
         if(piece != null){
@@ -90,7 +90,7 @@ public class ChessGame {
      * @param move chess move to perform
      * @throws InvalidMoveException if move is invalid
      */
-    public void makeMove(ChessMove move) throws InvalidMoveException {
+    public void makeMove(ChessMove move) throws InvalidMoveException{
         ChessPiece piece = board.getPiece(move.getStartPosition());
         
         if(piece == null){
@@ -174,7 +174,7 @@ public class ChessGame {
      * @param teamColor which team to check for check
      * @return True if the specified team is in check
      */
-    public boolean isInCheck(TeamColor teamColor) {
+    public boolean isInCheck(TeamColor teamColor){
         return calculateCheck(teamColor, board);
     }
 
@@ -184,7 +184,7 @@ public class ChessGame {
      * @param teamColor which team to check for checkmate
      * @return True if the specified team is in checkmate
      */
-    public boolean isInCheckmate(TeamColor teamColor) {
+    public boolean isInCheckmate(TeamColor teamColor){
         if(!isInCheck(teamColor)){
             return false;
         }
@@ -206,7 +206,7 @@ public class ChessGame {
      * @param teamColor which team to check for stalemate
      * @return True if the specified team is in stalemate, otherwise false
      */
-    public boolean isInStalemate(TeamColor teamColor) {
+    public boolean isInStalemate(TeamColor teamColor){
         if(!isInCheck(teamColor) && legalMoves(teamColor, board).isEmpty()){
             return true;
         }
@@ -218,7 +218,7 @@ public class ChessGame {
      *
      * @param board the new board to use
      */
-    public void setBoard(ChessBoard board) {
+    public void setBoard(ChessBoard board){
         this.board = board;
     }
 
@@ -227,7 +227,7 @@ public class ChessGame {
      *
      * @return the chessboard
      */
-    public ChessBoard getBoard() {
+    public ChessBoard getBoard(){
         return board;
     }
 
@@ -240,7 +240,7 @@ public class ChessGame {
     }
 
     @Override
-    public int hashCode() {
+    public int hashCode(){
         final int prime = 31;
         int result = 1;
         result = prime * result + ((board == null) ? 0 : board.hashCode());
@@ -249,25 +249,25 @@ public class ChessGame {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj){
+    public boolean equals(Object obj){
+        if(this == obj){
             return true;
         }
-        if (obj == null){
+        if(obj == null){
             return false;
         }
-        if (getClass() != obj.getClass()){
+        if(getClass() != obj.getClass()){
             return false;
         }
         ChessGame other = (ChessGame) obj;
-        if (board == null) {
-            if (other.board != null){
+        if(board == null){
+            if(other.board != null){
                 return false;
             }
-        } else if (!board.equals(other.board)){
+        }else if(!board.equals(other.board)){
             return false;
         }
-        if (turn != other.turn){
+        if(turn != other.turn){
             return false;
         }
         return true;
