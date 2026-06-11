@@ -131,14 +131,16 @@ public class GameplayUI {
     }
 
     private ChessPosition parsePosition(String pos) throws Exception{
-        if(pos.length() != 2)
+        if(pos.length() != 2){
             throw new Exception("Invalid position: " + pos);
+        }
         char colChar = pos.charAt(0);
         char rowChar = pos.charAt(1);
         int col = colChar - 'a' + 1;
         int row = rowChar - '0';
-        if(col < 1 || col > 8 || row < 1 || row > 8)
+        if(col < 1 || col > 8 || row < 1 || row > 8){
             throw new Exception("Position out of bounds: " + pos);
+        }
         return new ChessPosition(row, col);
     }
 }
