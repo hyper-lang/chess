@@ -80,11 +80,16 @@ public class Server{
         javalin.put("/game", this::joinGame);
 
         javalin.ws("/ws", ws ->{
-            ws.onConnect(ctx -> System.out.println("Connected"));
+            ws.onConnect(this::onConnect);
+            // ws.onConnect(ctx -> System.out.println("Connected"));
             ws.onMessage(this::onMessage);
             ws.onClose(ctx -> handleDisconnect(ctx));
             ws.onError(ctx -> handleDisconnect(ctx));
         });
+    }
+
+    public void onConnect(WsContext ctx){
+        ctx.enableAutomaticPings();
     }
 
     public int run(int desiredPort){

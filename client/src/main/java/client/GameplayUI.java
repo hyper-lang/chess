@@ -53,6 +53,7 @@ public class GameplayUI {
                 make <FROM> <TO> - make a move (e.g., make e2 e4)
                 resign - forfeit the game
                 highlight <PIECE> - highlight legal moves for a piece (e.g., highlight e2)
+                promote <FROM> <TO> <PROMOTION_PIECE (optional)>
                 """);
     }
 
@@ -70,28 +71,31 @@ public class GameplayUI {
         System.out.println("Left the game.");
     }
 
-    private void makeMove(String[] words) throws Exception{
-        if(words.length < 3 || !words[1].equals("move")){
-            if(words.length == 3){
-                String from = words[1];
-                String to = words[2];
-                sendMove(from, to);
-            }else if(words.length == 4 && words[1].equals("move")){
-                String from = words[2];
-                String to = words[3];
-                sendMove(from, to);
-            }else{
-                System.out.println("Invalid format. Use 'make <FROM> <TO>'");
+    private void makeMove(String[] words) throws Exception {
+        if(words.length == 4){
+            ChessPiece.PieceType promotion;
+            switch(words[3].toLowerCase()){
+                case "knight" -> promotion = ChessPiece.PieceType.KNIGHT;
+                case "bishop" -> promotion = ChessPiece.PieceType.BISHOP;
+                case "rook" -> promotion = ChessPiece.PieceType.ROOK;
+                case "queen" -> promotion = ChessPiece.PieceType.QUEEN;
+                default -> {
+                    System.out.println("Invalid promotion piece");
+                    return;
+                }
             }
-        }else{
-            sendMove(words[2], words[3]);
+            sendMove(words[1], words[2], promotion);
+        }else if(words.length == 3){
+            sendMove(words[1], words[2], null);
+        }else {
+            System.out.println("Invalid format. Use 'make <FROM> <TO> <PROMOTION_PIECE (optional)>'");
         }
     }
 
-    private void sendMove(String from, String to) throws Exception{
+    private void sendMove(String from, String to, ChessPiece.PieceType type) throws Exception{
         ChessPosition start = parsePosition(from);
         ChessPosition end = parsePosition(to);
-        ChessMove move = new ChessMove(start, end, null);
+        ChessMove move = new ChessMove(start, end, type);
         gameplayClient.send(new MoveUserGameCommand(auth.authToken(), gameID, move));
     }
 
