@@ -7,55 +7,21 @@ public class PrintBoard {
     private static String[] letters = { "a", "b", "c", "d", "e", "f", "g", "h" };
 
     public static void printBoard(ChessBoard board, boolean isWhite) {
-        int step = isWhite ? 1 : -1;
-        int start = isWhite ? 0 : 7;
-        int end = isWhite ? 8 : -1;
-
-        System.out.println();
-        letterRow(step, start, end);
-        for (int i = 0; i < 8; i++) {
-            int displayRank = isWhite ? 8 - i : i + 1;
-            printBorder(String.valueOf(displayRank));
-            for (int j = 0; j < 8; j++) {
-                int row;
-                int col;
-
-                if (isWhite) {
-                    row = 8 - i;
-                    col = j + 1;
-                } else {
-                    row = i + 1;
-                    col = 8 - j;
-                }
-
-                ChessPiece piece = board.getPiece(new ChessPosition(row, col));
-                String pieceColor;
-
-                if (piece == null) {
-                    pieceColor = EscapeSequences.SET_TEXT_COLOR_DARK_GREY;
-                } else {
-                    pieceColor = piece.getTeamColor() == ChessGame.TeamColor.WHITE
-                            ? EscapeSequences.SET_TEXT_COLOR_LIGHT_GREY
-                            : EscapeSequences.SET_TEXT_COLOR_RED;
-                }
-
-                if ((row + col) % 2 == 1) {
-                    printWhite(pieceSymbol(piece), pieceColor);
-                } else {
-                    printBlack(pieceSymbol(piece), pieceColor);
-                }
-            }
-            printBorder(String.valueOf(displayRank));
-            System.out.println();
-        }
-        letterRow(step, start, end);
+        printBoardInternal(board, isWhite, null, null);
     }
 
     public static void printBoardWithHighlights(ChessBoard board, boolean isWhite, ChessPosition startPos,
             java.util.Collection<ChessMove> highlights) {
+        printBoardInternal(board, isWhite, startPos, highlights);
+    }
+
+    private static void printBoardInternal(ChessBoard board, boolean isWhite, ChessPosition startPos,
+            java.util.Collection<ChessMove> highlights) {
         java.util.HashSet<ChessPosition> endPositions = new java.util.HashSet<>();
-        for (ChessMove move : highlights) {
-            endPositions.add(move.getEndPosition());
+        if (highlights != null) {
+            for (ChessMove move : highlights) {
+                endPositions.add(move.getEndPosition());
+            }
         }
 
         int step = isWhite ? 1 : -1;
@@ -92,9 +58,9 @@ public class PrintBoard {
                 }
 
                 String bgColor;
-                if (currentPos.equals(startPos)) {
+                if (startPos != null && currentPos.equals(startPos)) {
                     bgColor = EscapeSequences.SET_BG_COLOR_YELLOW;
-                } else if (endPositions.contains(currentPos)) {
+                } else if (highlights != null && endPositions.contains(currentPos)) {
                     bgColor = (row + col) % 2 == 1 ? EscapeSequences.SET_BG_COLOR_GREEN
                             : EscapeSequences.SET_BG_COLOR_DARK_GREEN;
                 } else {
@@ -141,16 +107,6 @@ public class PrintBoard {
     private static void printBorder(String content) {
         System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY + " "
                 + content + " " + EscapeSequences.RESET_BG_COLOR);
-    }
-
-    private static void printWhite(String content, String textColor) {
-        System.out.print(EscapeSequences.SET_BG_COLOR_WHITE + textColor
-                + content + EscapeSequences.RESET_TEXT_COLOR + EscapeSequences.RESET_BG_COLOR);
-    }
-
-    private static void printBlack(String content, String textColor) {
-        System.out.print(EscapeSequences.SET_BG_COLOR_BLACK + textColor
-                + content + EscapeSequences.RESET_TEXT_COLOR + EscapeSequences.RESET_BG_COLOR);
     }
 
     private static void letterRow(int step, int start, int end) {

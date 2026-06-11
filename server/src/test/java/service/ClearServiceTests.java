@@ -6,7 +6,6 @@ import dataaccess.MemoryUserDAO;
 import dataaccess.DataAccessException;
 import model.AuthData;
 import model.UserData;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
